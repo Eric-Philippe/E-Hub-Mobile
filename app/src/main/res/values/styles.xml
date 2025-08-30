@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom Switch Style -->
+    <style name="CustomSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="thumbTint">@color/switch_thumb_color</item>
+        <item name="trackTint">@color/switch_track_color</item>
+        <item name="android:switchMinWidth">56dp</item>
+        <item name="android:switchPadding">16dp</item>
+    </style>
+</resources>

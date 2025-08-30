@@ -8,6 +8,7 @@
 
     <!-- Status Bar with Clock and Timer -->
     <LinearLayout
+        android:id="@+id/statusBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -22,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="12:34"
+            android:text="@string/current_time_placeholder"
             android:textSize="16sp"
             android:textColor="#333333"
             android:fontFamily="sans-serif-medium"
@@ -34,12 +35,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:text="NONOGRAM"
+                android:text="@string/nonogram_game_title"
                 android:textSize="18sp"
                 android:textColor="#555555"
                 android:textAlignment="center"
                 android:fontFamily="sans-serif-light"
-                android:letterSpacing="0.1" tools:ignore="HardcodedText"/>
+                android:letterSpacing="0.1"/>
 
         <!-- Game Timer -->
         <TextView
@@ -89,53 +90,85 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingHorizontal="24dp"
         android:paddingVertical="16dp"
-        android:paddingBottom="32dp"
-        android:gravity="center">
+        android:paddingBottom="32dp">
 
-        <Button
-            android:id="@+id/backButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="Back"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif"
-            android:textAllCaps="false"
-            android:background="@drawable/button_outline"
-            android:elevation="0dp" />
+        <!-- First Row: Reset and New Board -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="12dp">
 
-        <Button
-            android:id="@+id/resetButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginHorizontal="8dp"
-            android:text="Reset"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif"
-            android:textAllCaps="false"
-            android:background="@drawable/button_outline"
-            android:elevation="0dp" />
+            <Button
+                android:id="@+id/resetButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="@string/reset"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/button_outline"
+                android:elevation="0dp" />
 
-        <Button
-            android:id="@+id/newGameButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="New Board"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif"
-            android:textAllCaps="false"
-            android:background="@drawable/button_outline"
-            android:elevation="0dp" />
+            <Button
+                android:id="@+id/newGameButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/new_board"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/button_outline"
+                android:elevation="0dp" />
+
+        </LinearLayout>
+
+        <!-- Second Row: Back and Settings -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="@string/back"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/button_outline"
+                android:elevation="0dp" />
+
+            <Button
+                android:id="@+id/settingsButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/settings"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/button_outline"
+                android:elevation="0dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

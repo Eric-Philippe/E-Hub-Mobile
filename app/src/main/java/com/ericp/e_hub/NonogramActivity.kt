@@ -1,6 +1,7 @@
 package com.ericp.e_hub
 
 import android.app.Activity
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
@@ -9,8 +10,6 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
@@ -19,7 +18,6 @@ import com.ericp.e_hub.nonogram.CelebrationToast
 import com.ericp.e_hub.nonogram.GameTimer
 import com.ericp.e_hub.nonogram.NonogramGame
 import com.ericp.e_hub.nonogram.NonogramStyles
-import androidx.core.content.edit
 
 class NonogramActivity : Activity() {
 
@@ -27,6 +25,7 @@ class NonogramActivity : Activity() {
     private lateinit var newGameButton: Button
     private lateinit var resetButton: Button
     private lateinit var backButton: Button
+    private lateinit var settingsButton: Button
     private lateinit var timerText: TextView
     private lateinit var currentTimeText: TextView
 
@@ -44,6 +43,7 @@ class NonogramActivity : Activity() {
     companion object {
         private const val PREFS_NAME = "nonogram_preferences"
         private const val KEY_VIBRATION_ENABLED = "vibration_enabled"
+        private const val KEY_TIMER_VISIBLE = "timer_visible"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +67,7 @@ class NonogramActivity : Activity() {
         newGameButton = findViewById(R.id.newGameButton)
         resetButton = findViewById(R.id.resetButton)
         backButton = findViewById(R.id.backButton)
+        settingsButton = findViewById(R.id.settingsButton)
         timerText = findViewById(R.id.timerText)
         currentTimeText = findViewById(R.id.currentTimeText)
 
@@ -75,6 +76,12 @@ class NonogramActivity : Activity() {
         newGameButton.setOnClickListener { startNewGame() }
         resetButton.setOnClickListener { resetBoard() }
         backButton.setOnClickListener { finish() }
+        settingsButton.setOnClickListener { openSettings() }
+    }
+
+    private fun openSettings() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
     }
 
     private fun initializeTimer() {
@@ -97,11 +104,14 @@ class NonogramActivity : Activity() {
         return sharedPreferences.getBoolean(KEY_VIBRATION_ENABLED, true)
     }
 
-    private fun toggleVibration() {
-        val currentSetting = isVibrationEnabled()
-        sharedPreferences.edit {
-            putBoolean(KEY_VIBRATION_ENABLED, !currentSetting)
-        }
+    private fun isTimerVisible(): Boolean {
+        return sharedPreferences.getBoolean(KEY_TIMER_VISIBLE, true)
+    }
+
+    private fun updateTimerVisibility() {
+        val visibility = if (isTimerVisible()) android.view.View.VISIBLE else android.view.View.GONE
+        timerText.visibility = visibility
+        currentTimeText.visibility = visibility
     }
 
     private fun performHapticFeedback() {
@@ -110,26 +120,11 @@ class NonogramActivity : Activity() {
         vibrator.vibrate(VibrationEffect.createOneShot(45, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menu?.add(0, 1, 0, if (isVibrationEnabled()) "Disable Vibration" else "Enable Vibration")
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            1 -> {
-                toggleVibration()
-                invalidateOptionsMenu() // Refresh menu to update text
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     private fun setupGame() {
         game.generateNewPuzzle()
         setupGrid()
         timer.start()
+        updateTimerVisibility()
     }
 
     private fun startNewGame() {
@@ -346,6 +341,7 @@ class NonogramActivity : Activity() {
     override fun onResume() {
         super.onResume()
         timer.resume()
+        updateTimerVisibility()
     }
 
     override fun onPause() {

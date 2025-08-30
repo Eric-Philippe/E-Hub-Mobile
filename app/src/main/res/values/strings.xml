@@ -9,4 +9,18 @@
     <string name="puzzle_solved">✓ Solved!</string>
     <string name="back">Back</string>
     <string name="initial_timer_display">00:00</string>
+
+    <!-- Nonogram Activity Strings -->
+    <string name="current_time_placeholder">12:34</string>
+    <string name="nonogram_game_title">NONOGRAM</string>
+    <string name="reset">Reset</string>
+    <string name="new_board">New Board</string>
+    <string name="settings">Settings</string>
+
+    <!-- Settings Activity Strings -->
+    <string name="settings_title">Settings</string>
+    <string name="vibration">Vibration</string>
+    <string name="vibration_description">Haptic feedback when tapping cells</string>
+    <string name="show_timer">Show Timer</string>
+    <string name="timer_description">Display game timer and current time</string>
 </resources>
