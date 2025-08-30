@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">E-Hub</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="welcome_to_ehub">Welcome to EHub App</string>
+    <string name="play_nonogram">Play Random Nonogram</string>
+    <string name="nonogram_title">5x5 Nonogram Puzzle</string>
+    <string name="new_game">New Game</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="puzzle_solved">✓ Solved!</string>
+    <string name="back">Back</string>
+    <string name="initial_timer_display">00:00</string>
+</resources>
