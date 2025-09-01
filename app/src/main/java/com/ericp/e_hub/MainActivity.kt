@@ -30,25 +30,28 @@ class MainActivity : Activity() {
 
         val nextCloudButton = findViewById<Button>(R.id.nextCloudButton)
         nextCloudButton.setOnClickListener {
+            val intent = Intent(this, NextCloudGymActivity::class.java)
+            startActivity(intent)
+        }
+
+        val nextCloudSettingsButton = findViewById<Button>(R.id.nextCloudSettingsButton)
+        nextCloudSettingsButton.setOnClickListener {
             val intent = Intent(this, NextCloudGymSettingsActivity::class.java)
             startActivity(intent)
         }
 
-        // Ajouter un bouton pour accéder aux paramètres depuis MainActivity
-        // (Vous pouvez ajouter ce bouton dans votre layout si nécessaire)
         val settingsButton = findViewById<Button?>(R.id.settingsButton)
         settingsButton?.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
 
-        // Exemple d'utilisation de l'API au démarrage
         checkApiAndFetchData()
     }
 
     private fun checkApiAndFetchData() {
         if (!apiHelper.isApiConfigured()) {
-            Toast.makeText(this, "Configurez votre API Key dans les paramètres", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Configure the API in settings", Toast.LENGTH_LONG).show()
             return
         }
     }

@@ -342,12 +342,11 @@ class NonogramActivity : Activity() {
 
             apiHelper.submitNonogramAsync(
                 data = gameData,
-                onSuccess = { response ->
+                onSuccess = { _ ->
                     // Game data submitted successfully
                 },
-                onError = { error ->
-                    // Handle error if needed - could log or show toast
-                    // For now, fail silently to not disrupt game flow
+                onError = { _ ->
+                    // Silently to not disrupt game flow
                 }
             )
         }

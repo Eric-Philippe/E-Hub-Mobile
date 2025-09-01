@@ -1,12 +1,12 @@
 package com.ericp.e_hub
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.config.NextCloudConfig
 import com.ericp.e_hub.network.ApiManager
 import kotlinx.coroutines.*
@@ -53,11 +53,11 @@ class NextCloudGymSettingsActivity : Activity() {
     }
 
     private fun loadSettings() {
-        // Charger la configuration API
+        // Load Nextcloud configuration
         serverUrlInput.setText(nextcloudConfig.getServerUrl())
         webdavEndpointInput.setText(nextcloudConfig.getWebdavEndpoint())
-        passwordInput.setText(nextcloudConfig.getPassword() ?: "")
-        usernameInput.setText(nextcloudConfig.getUsername() ?: "")
+        passwordInput.setText(nextcloudConfig.getPassword())
+        usernameInput.setText(nextcloudConfig.getUsername())
         updateApiStatus()
     }
 
@@ -66,7 +66,6 @@ class NextCloudGymSettingsActivity : Activity() {
             finish()
         }
 
-        // Nouveaux listeners pour l'API
         saveConfigurationButton.setOnClickListener {
             saveApiConfiguration()
         }
@@ -83,22 +82,22 @@ class NextCloudGymSettingsActivity : Activity() {
         val password = passwordInput.text.toString().trim()
 
         if (serverUrl.isBlank()) {
-            Toast.makeText(this, "L'URL du serveur ne peut pas être vide", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Server URL cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (webdavEndpoint.isBlank()) {
-            Toast.makeText(this, "Le WebDAV Endpoint ne peut pas être vide", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "WebDAV endpoint cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (username.isBlank()) {
-            Toast.makeText(this, "Le nom d'utilisateur ne peut pas être vide", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Username cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (password.isBlank()) {
-            Toast.makeText(this, "Le mot de passe ne peut pas être vide", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Password cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -111,14 +110,29 @@ class NextCloudGymSettingsActivity : Activity() {
         Toast.makeText(this, getString(R.string.api_key_saved), Toast.LENGTH_SHORT).show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun testApiConnection() {
-        // Sauvegarder temporairement les valeurs pour le test
+        // Temporarily store current values
         val currentServerUrl = nextcloudConfig.getServerUrl()
         val currentWebdavEndpoint = nextcloudConfig.getWebdavEndpoint()
         val currentUsername = nextcloudConfig.getUsername()
         val currentPassword = nextcloudConfig.getPassword()
 
         val testServerUrl = serverUrlInput.text.toString().trim()
+        val testWebdavEndpoint = webdavEndpointInput.text.toString().trim()
+        val testUsername = usernameInput.text.toString().trim()
+        val testPassword = passwordInput.text.toString().trim()
+
+        if (testServerUrl.isBlank() || testWebdavEndpoint.isBlank() || testUsername.isBlank() || testPassword.isBlank()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Apply test values
+        nextcloudConfig.setServerUrl(testServerUrl)
+        nextcloudConfig.setWebdavEndpoint(testWebdavEndpoint)
+        nextcloudConfig.setUsername(testUsername)
+        nextcloudConfig.setPassword(testPassword)
 
         apiStatusText.text = getString(R.string.api_status_testing)
         testApiButton.isEnabled = false
@@ -132,20 +146,20 @@ class NextCloudGymSettingsActivity : Activity() {
                 when (result) {
                     is ApiManager.ApiResult.Success -> {
                         apiStatusText.text = getString(R.string.api_status_connected)
-                        Toast.makeText(this@NextCloudGymSettingsActivity, "Connexion API réussie!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@NextCloudGymSettingsActivity, "Nextcloud API connection successful", Toast.LENGTH_SHORT).show()
                     }
                     is ApiManager.ApiResult.Error -> {
-                        apiStatusText.text = "Erreur: ${result.message}"
-                        Toast.makeText(this@NextCloudGymSettingsActivity, "Erreur de connexion: ${result.message}", Toast.LENGTH_LONG).show()
+                        apiStatusText.text = "Error: ${result.message}"
+                        Toast.makeText(this@NextCloudGymSettingsActivity, "Error de connexion: ${result.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
-                apiStatusText.text = "Erreur: ${e.message}"
-                Toast.makeText(this@NextCloudGymSettingsActivity, "Erreur: ${e.message}", Toast.LENGTH_LONG).show()
+                apiStatusText.text = "Error: ${e.message}"
+                Toast.makeText(this@NextCloudGymSettingsActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
-                // Restaurer les valeurs précédentes si le test a échoué
-                if (apiStatusText.text.contains("Erreur") || apiStatusText.text.contains("error")) {
-                    nextcloudConfig.setServerUrl(currentServerUrl)
+                // Restore original values if there was an error
+                if (apiStatusText.text.contains("Error") || apiStatusText.text.contains("error")) {
+                    nextcloudConfig.setServerUrl(currentServerUrl ?: "")
                     nextcloudConfig.setWebdavEndpoint(currentWebdavEndpoint)
                     nextcloudConfig.setUsername(currentUsername ?: "")
                     nextcloudConfig.setPassword(currentPassword ?: "")

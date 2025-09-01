@@ -117,7 +117,7 @@ class ApiManager private constructor() {
         val apiConfig = ApiConfig(context.applicationContext)
         val cacheKey = generateCacheKey(endpoint, "GET")
 
-        // Vérifier le cache d'abord si autorisé
+        // Return cached if available and valid
         if (useCache) {
             apiCache.get(cacheKey)?.let { cachedData ->
                 try {
@@ -128,9 +128,9 @@ class ApiManager private constructor() {
             }
         }
 
-        // Si pas de réseau, retourner depuis le cache même expiré ou erreur
+        // If no network, return from cache even if expired or error
         if (!isNetworkAvailable(context)) {
-            return ApiResult.Error("Pas de connexion réseau", cached = true)
+            return ApiResult.Error("No network connection", cached = apiCache.contains(cacheKey))
         }
 
         return try {
@@ -143,20 +143,20 @@ class ApiManager private constructor() {
             if (response.isSuccessful) {
                 val responseBody = response.body()?.string() ?: ""
 
-                // Mettre en cache si autorisé
+                // Cache if enabled
                 if (useCache) {
                     apiCache.put(cacheKey, responseBody, cacheTtlHours)
                 }
 
                 ApiResult.Success(responseBody)
             } else {
-                ApiResult.Error("Erreur HTTP: ${response.code()}")
+                ApiResult.Error("HTTP Error: ${response.code()}")
             }
 
         } catch (e: IOException) {
-            ApiResult.Error("Erreur réseau: ${e.message}")
+            ApiResult.Error("Network error: ${e.message}")
         } catch (e: Exception) {
-            ApiResult.Error("Erreur inattendue: ${e.message}")
+            ApiResult.Error("Unexpected error: ${e.message}")
         }
     }
 
@@ -168,7 +168,7 @@ class ApiManager private constructor() {
         val apiConfig = ApiConfig(context.applicationContext)
 
         if (!isNetworkAvailable(context)) {
-            return ApiResult.Error("Pas de connexion réseau")
+            return ApiResult.Error("No network connection")
         }
 
         return try {
@@ -186,26 +186,26 @@ class ApiManager private constructor() {
                 val responseBody = response.body()?.string() ?: ""
                 ApiResult.Success(responseBody)
             } else {
-                ApiResult.Error("Erreur HTTP: ${response.code()}")
+                ApiResult.Error("HTTP Error: ${response.code()}")
             }
 
         } catch (e: IOException) {
-            ApiResult.Error("Erreur réseau: ${e.message}")
+            ApiResult.Error("Network error: ${e.message}")
         } catch (e: Exception) {
-            ApiResult.Error("Erreur inattendue: ${e.message}")
+            ApiResult.Error("Unexpected error: ${e.message}")
         }
     }
 
     suspend fun testConnection(context: Context): ApiResult {
-        // TODO: Remplacer par un endpoint réel de test
+        // TODO: Replace with a proper endpoint to test connectivity
         return get(context, EHubApiHelper.Companion.Endpoints.TODO, useCache = false)
     }
 
-    suspend fun testNextCloudConnection(context: Context, nextCloudConfig: NextCloudConfig): ApiResult {
-        val testUrl = nextCloudConfig.getServerUrl().trimEnd('/') + nextCloudConfig.getWebdavEndpoint()
+    fun testNextCloudConnection(context: Context, nextCloudConfig: NextCloudConfig): ApiResult {
+        val testUrl = nextCloudConfig.getServerUrl()?.trimEnd('/') + nextCloudConfig.getWebdavEndpoint()
 
         if (!isNetworkAvailable(context)) {
-            return ApiResult.Error("Pas de connexion réseau")
+            return ApiResult.Error("No network connection")
         }
 
         return try {
@@ -217,21 +217,21 @@ class ApiManager private constructor() {
 
             val request = Request.Builder()
                 .url(testUrl)
-                .header("Authorization", Credentials.basic(nextCloudConfig.getUsername(), nextCloudConfig.getPassword()))
+                .header("Authorization", Credentials.basic(nextCloudConfig.getUsername() ?: "", nextCloudConfig.getPassword() ?: ""))
                 .get()
                 .build()
 
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    ApiResult.Success("Connexion réussie")
+                    ApiResult.Success("Connection successful")
                 } else {
-                    ApiResult.Error("Erreur HTTP: ${response.code}")
+                    ApiResult.Error("HTTP Error: ${response.code}" + if (response.code == 401) " (Unauthorized - check credentials)" else "")
                 }
             }
         } catch (e: IOException) {
-            ApiResult.Error("Erreur réseau: ${e.message}")
+            ApiResult.Error("Network error: ${e.message}")
         } catch (e: Exception) {
-            ApiResult.Error("Erreur inattendue: ${e.message}")
+            ApiResult.Error("Unexpected error: ${e.message}")
         }
     }
 

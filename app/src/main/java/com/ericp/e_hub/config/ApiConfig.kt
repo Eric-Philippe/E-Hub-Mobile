@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 
-class ApiConfig(private val context: Context) {
+class ApiConfig(context: Context) {
 
     companion object {
         const val PREFS_NAME = "api_config"
