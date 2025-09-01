@@ -31,6 +31,8 @@
     <string name="api_configuration">Configuration API</string>
     <string name="server_url">URL du serveur</string>
     <string name="server_url_hint">https://ehub.homeserver-ericp.fr</string>
+    <string name="webdav_endpoint">WebDAV Endpoint</string>
+    <string name="webdav_endpoint_hint">/remote.php/webdav/</string>
     <string name="api_key">Clé API</string>
     <string name="api_key_hint">Saisissez votre clé API</string>
     <string name="test_api">Tester</string>
@@ -42,4 +44,11 @@
     <string name="api_key_saved">Clé API sauvegardée</string>
     <string name="api_test_success">Connexion API réussie</string>
     <string name="api_test_failed">Échec du test API</string>
+
+    <!-- NextCloud Gym Settings Activity Strings -->
+    <string name="nextcloud_gym_settings_title">NextCloud Gym Settings</string>
+    <string name="nextcloud_configuration">NextCloud Configuration</string>
+    <string name="nextcloud_username">Username</string>
+    <string name="password">Password</string>
+    <string name="password_hint">Saisissez votre mot de passe</string>
 </resources>

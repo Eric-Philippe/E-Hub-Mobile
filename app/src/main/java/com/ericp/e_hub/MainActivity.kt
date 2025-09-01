@@ -28,6 +28,12 @@ class MainActivity : Activity() {
             startActivity(intent)
         }
 
+        val nextCloudButton = findViewById<Button>(R.id.nextCloudButton)
+        nextCloudButton.setOnClickListener {
+            val intent = Intent(this, NextCloudGymSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
         // Ajouter un bouton pour accéder aux paramètres depuis MainActivity
         // (Vous pouvez ajouter ce bouton dans votre layout si nécessaire)
         val settingsButton = findViewById<Button?>(R.id.settingsButton)

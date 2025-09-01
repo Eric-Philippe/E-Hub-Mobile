@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.ericp.e_hub.cache.ApiCache
 import com.ericp.e_hub.config.ApiConfig
+import com.ericp.e_hub.config.NextCloudConfig
 import com.ericp.e_hub.utils.EHubApiHelper
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -198,6 +199,40 @@ class ApiManager private constructor() {
     suspend fun testConnection(context: Context): ApiResult {
         // TODO: Remplacer par un endpoint réel de test
         return get(context, EHubApiHelper.Companion.Endpoints.TODO, useCache = false)
+    }
+
+    suspend fun testNextCloudConnection(context: Context, nextCloudConfig: NextCloudConfig): ApiResult {
+        val testUrl = nextCloudConfig.getServerUrl().trimEnd('/') + nextCloudConfig.getWebdavEndpoint()
+
+        if (!isNetworkAvailable(context)) {
+            return ApiResult.Error("Pas de connexion réseau")
+        }
+
+        return try {
+            val client = OkHttpClient.Builder()
+                .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .build()
+
+            val request = Request.Builder()
+                .url(testUrl)
+                .header("Authorization", Credentials.basic(nextCloudConfig.getUsername(), nextCloudConfig.getPassword()))
+                .get()
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    ApiResult.Success("Connexion réussie")
+                } else {
+                    ApiResult.Error("Erreur HTTP: ${response.code}")
+                }
+            }
+        } catch (e: IOException) {
+            ApiResult.Error("Erreur réseau: ${e.message}")
+        } catch (e: Exception) {
+            ApiResult.Error("Erreur inattendue: ${e.message}")
+        }
     }
 
     fun clearCache(context: Context) {

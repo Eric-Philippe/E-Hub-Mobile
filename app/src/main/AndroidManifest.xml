@@ -37,6 +37,10 @@
             android:name=".NonogramSettingsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".NextCloudGymSettingsActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
