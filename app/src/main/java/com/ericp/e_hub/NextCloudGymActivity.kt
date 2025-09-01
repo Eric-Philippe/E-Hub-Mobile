@@ -3,7 +3,9 @@ package com.ericp.e_hub
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
@@ -43,6 +45,7 @@ class NextCloudGymActivity : Activity() {
 
     companion object {
         private const val REQUEST_SELECT_PHOTOS = 1001
+        private const val REQUEST_DELETE_PHOTOS = 1002
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,9 +99,13 @@ class NextCloudGymActivity : Activity() {
     }
 
     private fun openGallery() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
+
+        // Grant URI permission to external apps (e.g., Google Photos)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         startActivityForResult(intent, REQUEST_SELECT_PHOTOS)
     }
 
@@ -113,11 +120,15 @@ class NextCloudGymActivity : Activity() {
                 // Multiple photos selected
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
+                    // Persist permission grants
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     selectedUris.add(uri)
                 }
             } else {
                 // Single photo selected
                 data.data?.let { uri ->
+                    // Persist permission grants
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     selectedUris.add(uri)
                 }
             }
@@ -128,6 +139,12 @@ class NextCloudGymActivity : Activity() {
                 uploadStatusText.visibility = View.VISIBLE
                 uploadStatusText.text = getString(R.string.ready_to_upload, selectedPhotos.size)
                 uploadButton.visibility = View.VISIBLE
+            }
+        } else if (requestCode == REQUEST_DELETE_PHOTOS) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Successfully deleted photos.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Could not delete all photos.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -178,6 +195,7 @@ class NextCloudGymActivity : Activity() {
         coroutineScope.launch {
             var successCount = 0
             var failCount = 0
+            val successfullyUploadedUris = mutableListOf<Uri>() // Track successfully uploaded URIs
 
             for ((index, uri) in selectedPhotos.withIndex()) {
                 try {
@@ -186,7 +204,12 @@ class NextCloudGymActivity : Activity() {
 
                     if (file != null) {
                         val result = uploadFileToNextCloud(file, fileName)
-                        if (result) successCount++ else failCount++
+                        if (result) {
+                            successCount++
+                            successfullyUploadedUris.add(uri)
+                        } else {
+                            failCount++
+                        }
                     } else {
                         failCount++
                     }
@@ -219,6 +242,9 @@ class NextCloudGymActivity : Activity() {
                 }
             }
 
+            // Delete successfully uploaded photos from device
+            deletePhotosFromDevice(successfullyUploadedUris)
+
             withContext(Dispatchers.Main) {
                 uploadStatusText.text = getString(
                     R.string.upload_complete,
@@ -231,9 +257,64 @@ class NextCloudGymActivity : Activity() {
                     selectedPhotos.clear()
                     photoAdapter.setPhotos(emptyList())
                     uploadButton.visibility = View.GONE
+                } else {
+                    // Remove only successfully uploaded photos from selection
+                    selectedPhotos.removeAll(successfullyUploadedUris)
+                    photoAdapter.setPhotos(selectedPhotos)
                 }
 
                 uploadButton.isEnabled = true
+            }
+        }
+    }
+
+    private fun deletePhotosFromDevice(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris)
+                startIntentSenderForResult(pendingIntent.intentSender, REQUEST_DELETE_PHOTOS, null, 0, 0, 0)
+            } catch (e: IllegalArgumentException) {
+                // This can happen if URIs are not from MediaStore (e.g. Google Photos).
+                // Fallback to individual deletion.
+                var couldNotDelete = false
+                for (uri in uris) {
+                    try {
+                        if (!DocumentsContract.deleteDocument(contentResolver, uri)) {
+                            couldNotDelete = true
+                        }
+                    } catch (ex: Exception) {
+                        // If DocumentsContract fails, try contentResolver.delete as a last resort.
+                        try {
+                            if (contentResolver.delete(uri, null, null) == 0) {
+                                couldNotDelete = true
+                            }
+                        } catch (e2: Exception) {
+                            couldNotDelete = true
+                            e2.printStackTrace()
+                        }
+                    }
+                }
+                if (couldNotDelete) {
+                    Toast.makeText(this, "Could not delete all photos.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Successfully deleted photos.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Could not start delete request.", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            for (uri in uris) {
+                try {
+                    contentResolver.delete(uri, null, null)
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
+                    // Can't do much here on older versions if we don't have permission
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
