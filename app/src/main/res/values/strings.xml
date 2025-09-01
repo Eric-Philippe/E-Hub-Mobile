@@ -45,6 +45,21 @@
     <string name="api_test_success">Connexion API réussie</string>
     <string name="api_test_failed">Échec du test API</string>
 
+    <!-- NextCloud Gym Activity Strings -->
+    <string name="nextcloud_gym_title">NextCloud Gym</string>
+    <string name="nextcloud_settings">NextCloud Settings</string>
+    <string name="checking_connection">Checking connection...</string>
+    <string name="nextcloud_not_configured">NextCloud is not configured</string>
+    <string name="connected_to_nextcloud">Connected to NextCloud</string>
+    <string name="connection_error">Connection error: %1$s</string>
+    <string name="select_photos">Select Photos</string>
+    <string name="selected_photo">Selected photo</string>
+    <string name="no_photos_selected">No photos selected</string>
+    <string name="upload_starting">Starting upload...</string>
+    <string name="upload_progress">Uploading %1$d of %2$d (%3$d success, %4$d failed)</string>
+    <string name="upload_complete">Upload complete! %1$d success, %2$d failed</string>
+    <string name="ready_to_upload">Ready to upload %1$d photos</string>
+
     <!-- NextCloud Gym Settings Activity Strings -->
     <string name="nextcloud_gym_settings_title">NextCloud Gym Settings</string>
     <string name="nextcloud_configuration">NextCloud Configuration</string>
