@@ -18,6 +18,11 @@ import com.ericp.e_hub.nonogram.CelebrationToast
 import com.ericp.e_hub.nonogram.GameTimer
 import com.ericp.e_hub.nonogram.NonogramGame
 import com.ericp.e_hub.nonogram.NonogramStyles
+import com.ericp.e_hub.utils.EHubApiHelper
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
+import java.util.Date
 
 class NonogramActivity : Activity() {
 
@@ -38,12 +43,20 @@ class NonogramActivity : Activity() {
 
     private var cellButtons = Array(game.gridSize) { Array<Button?>(game.gridSize) { null } }
     private var rowClueViews = Array<TextView?>(game.gridSize) { null }
+    private lateinit var apiHelper: EHubApiHelper
     private var colClueViews = Array<TextView?>(game.gridSize) { null }
+
+    // Track game session dates - moved from companion object to instance variable
+    private var gameStartDate: Date? = null
 
     companion object {
         private const val PREFS_NAME = "nonogram_preferences"
         private const val KEY_VIBRATION_ENABLED = "vibration_enabled"
         private const val KEY_TIMER_VISIBLE = "timer_visible"
+
+        private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +72,7 @@ class NonogramActivity : Activity() {
         initializeTimer()
         initializeVibrator()
         initializePreferences()
+        apiHelper = EHubApiHelper(this)
         celebrationToast = CelebrationToast(this)
     }
 
@@ -67,7 +81,7 @@ class NonogramActivity : Activity() {
         newGameButton = findViewById(R.id.newGameButton)
         resetButton = findViewById(R.id.resetButton)
         backButton = findViewById(R.id.backButton)
-        settingsButton = findViewById(R.id.settingsButton)
+        settingsButton = findViewById(R.id.nonogramSettingsButton)
         timerText = findViewById(R.id.timerText)
         currentTimeText = findViewById(R.id.currentTimeText)
 
@@ -80,7 +94,7 @@ class NonogramActivity : Activity() {
     }
 
     private fun openSettings() {
-        val intent = Intent(this, SettingsActivity::class.java)
+        val intent = Intent(this, NonogramSettingsActivity::class.java)
         startActivity(intent)
     }
 
@@ -121,6 +135,7 @@ class NonogramActivity : Activity() {
     }
 
     private fun setupGame() {
+        gameStartDate = Date()
         game.generateNewPuzzle()
         setupGrid()
         timer.start()
@@ -128,6 +143,7 @@ class NonogramActivity : Activity() {
     }
 
     private fun startNewGame() {
+        gameStartDate = Date()
         game.generateNewPuzzle()
         setupGrid()
         timer.restart()
@@ -301,11 +317,40 @@ class NonogramActivity : Activity() {
 
     private fun handlePuzzleSolved() {
         timer.stop()
+
+        // Submit game data to API
+        submitGameData()
+
         showCelebrationEffects()
 
         handler.postDelayed({
             startNewGame()
         }, 1000)
+    }
+
+    private fun submitGameData() {
+        val startDate = gameStartDate
+        if (startDate != null) {
+            val endDate = Date()
+            val startDateStr = dateFormat.format(startDate)
+            val endDateStr = dateFormat.format(endDate)
+
+            val gameData = mapOf(
+                "started" to startDateStr,
+                "ended" to endDateStr
+            )
+
+            apiHelper.submitNonogramAsync(
+                data = gameData,
+                onSuccess = { response ->
+                    // Game data submitted successfully
+                },
+                onError = { error ->
+                    // Handle error if needed - could log or show toast
+                    // For now, fail silently to not disrupt game flow
+                }
+            )
+        }
     }
 
     private fun showCelebrationEffects() {
@@ -355,6 +400,7 @@ class NonogramActivity : Activity() {
     }
 
     private fun resetBoard() {
+        gameStartDate = Date() // Reset start time when board is reset
         game.resetBoard()
         for (i in 0 until game.gridSize) {
             for (j in 0 until game.gridSize) {

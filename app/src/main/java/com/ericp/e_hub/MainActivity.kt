@@ -4,16 +4,51 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.Toast
+import com.ericp.e_hub.utils.EHubApiHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 
 class MainActivity : Activity() {
+
+    private lateinit var apiHelper: EHubApiHelper
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        apiHelper = EHubApiHelper(this)
 
         val playNonogramButton = findViewById<Button>(R.id.playNonogramButton)
         playNonogramButton.setOnClickListener {
             val intent = Intent(this, NonogramActivity::class.java)
             startActivity(intent)
         }
+
+        // Ajouter un bouton pour accéder aux paramètres depuis MainActivity
+        // (Vous pouvez ajouter ce bouton dans votre layout si nécessaire)
+        val settingsButton = findViewById<Button?>(R.id.settingsButton)
+        settingsButton?.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Exemple d'utilisation de l'API au démarrage
+        checkApiAndFetchData()
+    }
+
+    private fun checkApiAndFetchData() {
+        if (!apiHelper.isApiConfigured()) {
+            Toast.makeText(this, "Configurez votre API Key dans les paramètres", Toast.LENGTH_LONG).show()
+            return
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        coroutineScope.cancel()
     }
 }
