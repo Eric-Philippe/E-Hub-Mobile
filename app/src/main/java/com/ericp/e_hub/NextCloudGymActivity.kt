@@ -10,8 +10,6 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.adapters.PhotoAdapter
@@ -26,7 +24,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-class NextCloudGymActivity : AppCompatActivity() {
+class NextCloudGymActivity : Activity() {
     private lateinit var backButton: Button
     private lateinit var settingsButton: Button
     private lateinit var selectPhotosButton: Button
@@ -43,35 +41,8 @@ class NextCloudGymActivity : AppCompatActivity() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var selectedPhotos = mutableListOf<Uri>()
 
-    private val galleryLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK && result.data != null) {
-            val data = result.data
-            val clipData = data?.clipData
-            val selectedUris = mutableListOf<Uri>()
-
-            if (clipData != null) {
-                // Multiple photos selected
-                for (i in 0 until clipData.itemCount) {
-                    val uri = clipData.getItemAt(i).uri
-                    selectedUris.add(uri)
-                }
-            } else {
-                // Single photo selected
-                data?.data?.let { uri ->
-                    selectedUris.add(uri)
-                }
-            }
-
-            if (selectedUris.isNotEmpty()) {
-                selectedPhotos.addAll(selectedUris)
-                photoAdapter.addPhotos(selectedUris)
-                uploadStatusText.visibility = View.VISIBLE
-                uploadStatusText.text = getString(R.string.ready_to_upload, selectedPhotos.size)
-                uploadButton.visibility = View.VISIBLE
-            }
-        }
+    companion object {
+        private const val REQUEST_SELECT_PHOTOS = 1001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,8 +98,38 @@ class NextCloudGymActivity : AppCompatActivity() {
     private fun openGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        intent.type = "image/*"
-        galleryLauncher.launch(intent)
+        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
+        startActivityForResult(intent, REQUEST_SELECT_PHOTOS)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_SELECT_PHOTOS && resultCode == RESULT_OK && data != null) {
+            val clipData = data.clipData
+            val selectedUris = mutableListOf<Uri>()
+
+            if (clipData != null) {
+                // Multiple photos selected
+                for (i in 0 until clipData.itemCount) {
+                    val uri = clipData.getItemAt(i).uri
+                    selectedUris.add(uri)
+                }
+            } else {
+                // Single photo selected
+                data.data?.let { uri ->
+                    selectedUris.add(uri)
+                }
+            }
+
+            if (selectedUris.isNotEmpty()) {
+                selectedPhotos.addAll(selectedUris)
+                photoAdapter.addPhotos(selectedUris)
+                uploadStatusText.visibility = View.VISIBLE
+                uploadStatusText.text = getString(R.string.ready_to_upload, selectedPhotos.size)
+                uploadButton.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun checkConnection() {
