@@ -8,8 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Classe utilitaire pour simplifier l'utilisation de l'API
- * Exemple d'utilisation du système d'API Key implémenté
+ * Class for managing API interactions
  */
 class EHubApiHelper(private val context: Context) {
 
@@ -17,7 +16,7 @@ class EHubApiHelper(private val context: Context) {
     private val apiConfig = ApiConfig(context)
 
     /**
-     * Vérifie si l'API est configurée
+     * Check if the API is configured
      */
     fun isApiConfigured(): Boolean {
         return apiConfig.isApiKeyConfigured()
@@ -29,7 +28,7 @@ class EHubApiHelper(private val context: Context) {
         onError: (String) -> Unit
     ) {
         if (!isApiConfigured()) {
-            onError("API non configurée. Veuillez configurer votre clé API dans les paramètres.")
+            onError("API not configured. Please set your API key in settings.")
             return
         }
 
@@ -40,9 +39,9 @@ class EHubApiHelper(private val context: Context) {
                 }
                 is ApiManager.ApiResult.Error -> {
                     val errorMsg = if (result.cached) {
-                        "Pas de réseau - données possiblement obsolètes: ${result.message}"
+                        "No network - data may be outdated: ${result.message}"
                     } else {
-                        "Erreur API: ${result.message}"
+                        "API Error: ${result.message}"
                     }
                     onError(errorMsg)
                 }
@@ -57,7 +56,7 @@ class EHubApiHelper(private val context: Context) {
         onError: (String) -> Unit
     ) {
         if (!isApiConfigured()) {
-            onError("API non configurée. Veuillez configurer votre clé API dans les paramètres.")
+            onError("API not configured. Please set your API key in settings.")
             return
         }
 
@@ -67,14 +66,14 @@ class EHubApiHelper(private val context: Context) {
                     onSuccess(result.data)
                 }
                 is ApiManager.ApiResult.Error -> {
-                    onError("Erreur API: ${result.message}")
+                    onError("API Error: ${result.message}")
                 }
             }
         }
     }
 
     /**
-     * Vider le cache en cas de besoin
+     * Empty the API cache
      */
     fun clearApiCache() {
         apiManager.clearCache(context)
@@ -89,7 +88,7 @@ class EHubApiHelper(private val context: Context) {
         onError: (String) -> Unit
     ) {
         if (!isApiConfigured()) {
-            onError("API non configurée. Veuillez configurer votre clé API dans les paramètres.")
+            onError("API not configured. Please set your API key in settings.")
             return
         }
 
@@ -100,9 +99,9 @@ class EHubApiHelper(private val context: Context) {
                 }
                 is ApiManager.ApiResult.Error -> {
                     val errorMsg = if (result.cached) {
-                        "Pas de réseau - données possiblement obsolètes: ${result.message}"
+                        "No network - data may be outdated: ${result.message}"
                     } else {
-                        "Erreur API: ${result.message}"
+                        "API Error: ${result.message}"
                     }
                     onError(errorMsg)
                 }

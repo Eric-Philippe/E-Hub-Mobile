@@ -7,18 +7,18 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 
-class ApiCache(private val context: Context) {
+class ApiCache(context: Context) {
 
     companion object {
         private const val CACHE_DIR = "api_cache"
         private const val CACHE_INDEX_FILE = "cache_index.json"
-        private const val CACHE_TTL_HOURS = 24L // 24 heures de cache
+        private const val CACHE_TTL_HOURS = 24L // 24 hours
     }
 
     data class CacheEntry(
         val timestamp: Long,
         val data: String,
-        val ttl: Long = CACHE_TTL_HOURS * 60 * 60 * 1000 // TTL en millisecondes
+        val ttl: Long = CACHE_TTL_HOURS * 60 * 60 * 1000 // TTL in milliseconds
     )
 
     private val gson = Gson()
@@ -72,9 +72,9 @@ class ApiCache(private val context: Context) {
         val index = getCacheIndex()
         val entry = index[key] ?: return null
 
-        // Vérifier si le cache n'est pas expiré
+        // Check if the cache entry is still valid
         if (System.currentTimeMillis() - entry.timestamp > entry.ttl) {
-            // Cache expiré, le supprimer
+            // Entry expired
             index.remove(key)
             saveCacheIndex(index)
             return null

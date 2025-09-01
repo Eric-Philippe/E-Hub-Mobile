@@ -1,5 +1,6 @@
 package com.ericp.e_hub
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -9,6 +10,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -33,6 +35,8 @@ class NextCloudGymActivity : Activity() {
     private lateinit var connectionStatusText: TextView
     private lateinit var uploadProgressBar: ProgressBar
     private lateinit var uploadStatusText: TextView
+    private lateinit var uploadStageText: TextView
+    private lateinit var uploadProgressSection: LinearLayout
     private lateinit var photoRecyclerView: RecyclerView
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var uploadButton: Button
@@ -64,19 +68,24 @@ class NextCloudGymActivity : Activity() {
         connectionStatusText = findViewById(R.id.connectionStatusText)
         uploadProgressBar = findViewById(R.id.uploadProgressBar)
         uploadStatusText = findViewById(R.id.uploadStatusText)
+        uploadStageText = findViewById(R.id.uploadStageText)
+        uploadProgressSection = findViewById(R.id.uploadProgressSection)
         photoRecyclerView = findViewById(R.id.photoRecyclerView)
         uploadButton = findViewById(R.id.uploadButton)
 
         nextCloudConfig = NextCloudConfig(this)
         apiManager = ApiManager.getInstance()
 
-        // Setup RecyclerView
-        photoAdapter = PhotoAdapter()
+        // Setup RecyclerView with photo removal callback
+        photoAdapter = PhotoAdapter { uri, position ->
+            removePhoto(uri, position)
+        }
         photoRecyclerView.layoutManager = GridLayoutManager(this, 2)
         photoRecyclerView.adapter = photoAdapter
 
-        // Initially hide the upload button until photos are selected
+        // Initially hide the upload button and progress section until photos are selected
         uploadButton.visibility = View.GONE
+        uploadProgressSection.visibility = View.GONE
     }
 
     private fun setupListeners() {
@@ -114,31 +123,38 @@ class NextCloudGymActivity : Activity() {
 
         if (requestCode == REQUEST_SELECT_PHOTOS && resultCode == RESULT_OK && data != null) {
             val clipData = data.clipData
-            val selectedUris = mutableListOf<Uri>()
+            val newSelectedUris = mutableListOf<Uri>()
 
             if (clipData != null) {
                 // Multiple photos selected
                 for (i in 0 until clipData.itemCount) {
                     val uri = clipData.getItemAt(i).uri
-                    // Persist permission grants
-                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    selectedUris.add(uri)
+                    // Only add if not already selected
+                    if (!selectedPhotos.contains(uri)) {
+                        // Persist permission grants
+                        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        newSelectedUris.add(uri)
+                    }
                 }
             } else {
                 // Single photo selected
                 data.data?.let { uri ->
-                    // Persist permission grants
-                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                    selectedUris.add(uri)
+                    // Only add if not already selected
+                    if (!selectedPhotos.contains(uri)) {
+                        // Persist permission grants
+                        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        newSelectedUris.add(uri)
+                    }
                 }
             }
 
-            if (selectedUris.isNotEmpty()) {
-                selectedPhotos.addAll(selectedUris)
-                photoAdapter.addPhotos(selectedUris)
-                uploadStatusText.visibility = View.VISIBLE
-                uploadStatusText.text = getString(R.string.ready_to_upload, selectedPhotos.size)
-                uploadButton.visibility = View.VISIBLE
+            if (newSelectedUris.isNotEmpty()) {
+                selectedPhotos.addAll(newSelectedUris)
+                photoAdapter.addPhotos(newSelectedUris)
+                updateUploadStatus()
+            } else if (data.clipData != null || data.data != null) {
+                // All selected photos were duplicates
+                Toast.makeText(this, "Photos already selected", Toast.LENGTH_SHORT).show()
             }
         } else if (requestCode == REQUEST_DELETE_PHOTOS) {
             if (resultCode == RESULT_OK) {
@@ -147,6 +163,12 @@ class NextCloudGymActivity : Activity() {
                 Toast.makeText(this, "Could not delete all photos.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun updateUploadStatus() {
+        uploadStatusText.visibility = View.VISIBLE
+        uploadStatusText.text = getString(R.string.ready_to_upload, selectedPhotos.size)
+        uploadButton.visibility = View.VISIBLE
     }
 
     private fun checkConnection() {
@@ -185,18 +207,20 @@ class NextCloudGymActivity : Activity() {
             return
         }
 
-        uploadProgressBar.visibility = View.VISIBLE
+        // Show progress section and initialize
+        uploadProgressSection.visibility = View.VISIBLE
         uploadProgressBar.max = selectedPhotos.size
         uploadProgressBar.progress = 0
-        uploadStatusText.visibility = View.VISIBLE
+        uploadStageText.text = getString(R.string.uploading_photos)
         uploadStatusText.text = getString(R.string.upload_starting)
         uploadButton.isEnabled = false
 
         coroutineScope.launch {
             var successCount = 0
             var failCount = 0
-            val successfullyUploadedUris = mutableListOf<Uri>() // Track successfully uploaded URIs
+            val successfullyUploadedUris = mutableListOf<Uri>()
 
+            // Upload Phase
             for ((index, uri) in selectedPhotos.withIndex()) {
                 try {
                     val fileName = getFileNameFromUri(uri)
@@ -242,6 +266,12 @@ class NextCloudGymActivity : Activity() {
                 }
             }
 
+            // Switch to deletion phase
+            withContext(Dispatchers.Main) {
+                uploadStageText.text = getString(R.string.deleting_photos)
+                uploadStatusText.text = getString(R.string.preparing_to_delete, successfullyUploadedUris.size)
+            }
+
             // Delete successfully uploaded photos from device
             deletePhotosFromDevice(successfullyUploadedUris)
 
@@ -257,6 +287,7 @@ class NextCloudGymActivity : Activity() {
                     selectedPhotos.clear()
                     photoAdapter.setPhotos(emptyList())
                     uploadButton.visibility = View.GONE
+                    uploadProgressSection.visibility = View.GONE
                 } else {
                     // Remove only successfully uploaded photos from selection
                     selectedPhotos.removeAll(successfullyUploadedUris)
@@ -268,6 +299,7 @@ class NextCloudGymActivity : Activity() {
         }
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     private fun deletePhotosFromDevice(uris: List<Uri>) {
         if (uris.isEmpty()) return
 
@@ -284,7 +316,7 @@ class NextCloudGymActivity : Activity() {
                         if (!DocumentsContract.deleteDocument(contentResolver, uri)) {
                             couldNotDelete = true
                         }
-                    } catch (ex: Exception) {
+                    } catch (_: Exception) {
                         // If DocumentsContract fails, try contentResolver.delete as a last resort.
                         try {
                             if (contentResolver.delete(uri, null, null) == 0) {
@@ -353,7 +385,7 @@ class NextCloudGymActivity : Activity() {
 
     private suspend fun uploadFileToNextCloud(file: File, fileName: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            val baseUrl = nextCloudConfig.getServerUrl().trimEnd('/')
+            val baseUrl = nextCloudConfig.getServerUrl()?.trimEnd('/')
             val webdavPath = nextCloudConfig.getWebdavEndpoint()
             val username = nextCloudConfig.getUsername()
             val password = nextCloudConfig.getPassword()
@@ -371,7 +403,7 @@ class NextCloudGymActivity : Activity() {
 
             val request = Request.Builder()
                 .url(targetUrl)
-                .header("Authorization", Credentials.basic(username, password))
+                .header("Authorization", Credentials.basic(username ?: "", password ?: ""))
                 .put(requestBody)
                 .build()
 
@@ -393,5 +425,20 @@ class NextCloudGymActivity : Activity() {
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()
+    }
+
+    private fun removePhoto(uri: Uri, position: Int) {
+        selectedPhotos.remove(uri)
+        photoAdapter.removePhoto(position)
+
+        // Update upload status
+        if (selectedPhotos.isEmpty()) {
+            uploadButton.visibility = View.GONE
+            uploadStatusText.visibility = View.GONE
+        } else {
+            updateUploadStatus()
+        }
+
+        Toast.makeText(this, getString(R.string.photo_removed), Toast.LENGTH_SHORT).show()
     }
 }

@@ -1,5 +1,6 @@
 package com.ericp.e_hub
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.widget.Button
@@ -13,7 +14,6 @@ import kotlinx.coroutines.*
 class SettingsActivity : Activity() {
     private lateinit var backButton: Button
 
-    // Nouveaux éléments pour l'API
     private lateinit var serverUrlInput: EditText
     private lateinit var apiKeyInput: EditText
     private lateinit var testApiButton: Button
@@ -37,7 +37,6 @@ class SettingsActivity : Activity() {
     private fun initializeComponents() {
         backButton = findViewById(R.id.backButton)
 
-        // Nouveaux éléments API
         serverUrlInput = findViewById(R.id.serverUrlInput)
         apiKeyInput = findViewById(R.id.apiKeyInput)
         testApiButton = findViewById(R.id.testApiButton)
@@ -49,7 +48,7 @@ class SettingsActivity : Activity() {
     }
 
     private fun loadSettings() {
-        // Charger la configuration API
+        // Load API configuration
         serverUrlInput.setText(apiConfig.getServerUrl())
         apiKeyInput.setText(apiConfig.getApiKey() ?: "")
         updateApiStatus()
@@ -60,7 +59,6 @@ class SettingsActivity : Activity() {
             finish()
         }
 
-        // Nouveaux listeners pour l'API
         saveApiButton.setOnClickListener {
             saveApiConfiguration()
         }
@@ -75,12 +73,12 @@ class SettingsActivity : Activity() {
         val apiKey = apiKeyInput.text.toString().trim()
 
         if (serverUrl.isBlank()) {
-            Toast.makeText(this, "L'URL du serveur ne peut pas être vide", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Server URL cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
         if (apiKey.isBlank()) {
-            Toast.makeText(this, "La clé API ne peut pas être vide", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "API Key cannot be empty", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -91,8 +89,9 @@ class SettingsActivity : Activity() {
         Toast.makeText(this, getString(R.string.api_key_saved), Toast.LENGTH_SHORT).show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun testApiConnection() {
-        // Sauvegarder temporairement les valeurs pour le test
+        // Temporarily store current values
         val currentServerUrl = apiConfig.getServerUrl()
         val currentApiKey = apiConfig.getApiKey()
 
@@ -100,11 +99,11 @@ class SettingsActivity : Activity() {
         val testApiKey = apiKeyInput.text.toString().trim()
 
         if (testServerUrl.isBlank() || testApiKey.isBlank()) {
-            Toast.makeText(this, "Veuillez remplir l'URL du serveur et la clé API", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter both Server URL and API Key to test", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Appliquer temporairement les nouvelles valeurs pour le test
+        // Apply test values
         apiConfig.setServerUrl(testServerUrl)
         apiConfig.setApiKey(testApiKey)
 
@@ -120,19 +119,19 @@ class SettingsActivity : Activity() {
                 when (result) {
                     is ApiManager.ApiResult.Success -> {
                         apiStatusText.text = getString(R.string.api_status_connected)
-                        Toast.makeText(this@SettingsActivity, "Connexion API réussie!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SettingsActivity, "API connection successful", Toast.LENGTH_SHORT).show()
                     }
                     is ApiManager.ApiResult.Error -> {
-                        apiStatusText.text = "Erreur: ${result.message}"
-                        Toast.makeText(this@SettingsActivity, "Erreur de connexion: ${result.message}", Toast.LENGTH_LONG).show()
+                        apiStatusText.text = "Error: ${result.message}"
+                        Toast.makeText(this@SettingsActivity, "Error de connexion: ${result.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {
-                apiStatusText.text = "Erreur: ${e.message}"
-                Toast.makeText(this@SettingsActivity, "Erreur: ${e.message}", Toast.LENGTH_LONG).show()
+                apiStatusText.text = "Error: ${e.message}"
+                Toast.makeText(this@SettingsActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
-                // Restaurer les valeurs précédentes si le test a échoué
-                if (apiStatusText.text.contains("Erreur") || apiStatusText.text.contains("error")) {
+                // Restore original values if there was an error
+                if (apiStatusText.text.contains("Error") || apiStatusText.text.contains("error")) {
                     apiConfig.setServerUrl(currentServerUrl)
                     if (currentApiKey != null)
                         apiConfig.setApiKey(currentApiKey)

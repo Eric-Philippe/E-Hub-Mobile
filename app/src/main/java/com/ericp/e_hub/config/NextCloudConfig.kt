@@ -14,8 +14,8 @@ class NextCloudConfig(context: Context) {
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun getServerUrl(): String {
-        return sharedPreferences.getString(KEY_SERVER_URL, "") ?: ""
+    fun getServerUrl(): String? {
+        return sharedPreferences.getString(KEY_SERVER_URL, "")
     }
 
     fun setServerUrl(url: String) {
@@ -42,8 +42,8 @@ class NextCloudConfig(context: Context) {
         }
     }
 
-    fun getUsername(): String {
-        return sharedPreferences.getString(KEY_USERNAME, "") ?: ""
+    fun getUsername(): String? {
+        return sharedPreferences.getString(KEY_USERNAME, "")
     }
 
     fun setUsername(username: String) {
@@ -52,8 +52,8 @@ class NextCloudConfig(context: Context) {
         }
     }
 
-    fun getPassword(): String {
-        return sharedPreferences.getString(KEY_PASSWORD, "") ?: ""
+    fun getPassword(): String? {
+        return sharedPreferences.getString(KEY_PASSWORD, "")
     }
 
     fun setPassword(password: String) {
@@ -63,7 +63,10 @@ class NextCloudConfig(context: Context) {
     }
 
     fun isConfigured(): Boolean {
-        return getServerUrl().isNotBlank() && getUsername().isNotBlank() && getPassword().isNotBlank()
+        return !getServerUrl().isNullOrBlank() &&
+                getWebdavEndpoint().isNotBlank() &&
+               !getUsername().isNullOrBlank() &&
+               !getPassword().isNullOrBlank()
     }
 
     fun clearCredentials() {

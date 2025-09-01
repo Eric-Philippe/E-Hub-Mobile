@@ -1,18 +1,19 @@
 <resources>
+    <!-- General App Strings -->
     <string name="app_name">E-Hub</string>
     <string name="hello_world">Hello World!</string>
     <string name="welcome_to_ehub">Welcome to EHub App</string>
     <string name="play_nonogram">Play Random Nonogram</string>
+
+    <!-- Nonogram Activity Strings -->
+    <string name="current_time_placeholder">12:34</string>
+    <string name="nonogram_game_title">NONOGRAM</string>
     <string name="nonogram_title">5x5 Nonogram Puzzle</string>
     <string name="new_game">New Game</string>
     <string name="congratulations">Congratulations!</string>
     <string name="puzzle_solved">✓ Solved!</string>
     <string name="back">Back</string>
     <string name="initial_timer_display">00:00</string>
-
-    <!-- Nonogram Activity Strings -->
-    <string name="current_time_placeholder">12:34</string>
-    <string name="nonogram_game_title">NONOGRAM</string>
     <string name="reset">Reset</string>
     <string name="new_board">New Board</string>
     <string name="settings">Settings</string>
@@ -34,36 +35,41 @@
     <string name="webdav_endpoint">WebDAV Endpoint</string>
     <string name="webdav_endpoint_hint">/remote.php/webdav/</string>
     <string name="api_key">Clé API</string>
-    <string name="api_key_hint">Saisissez votre clé API</string>
-    <string name="test_api">Tester</string>
-    <string name="save_api">Sauvegarder</string>
-    <string name="api_status_not_configured">API non configurée</string>
-    <string name="api_status_connected">✓ Connexion réussie</string>
-    <string name="api_status_error">✗ Erreur de connexion</string>
-    <string name="api_status_testing">Test en cours...</string>
-    <string name="api_key_saved">Clé API sauvegardée</string>
-    <string name="api_test_success">Connexion API réussie</string>
-    <string name="api_test_failed">Échec du test API</string>
+    <string name="api_key_hint">Input your API key</string>
+    <string name="test_api">Test Connection</string>
+    <string name="save_api">Save</string>
+    <string name="api_status_not_configured">API not configured</string>
+    <string name="api_status_connected">✓ Connection successful</string>
+    <string name="api_status_error">✗ Connection error</string>
+    <string name="api_status_testing">Testing…</string>
+    <string name="api_key_saved">API key saved</string>
+    <string name="api_test_success">API connection successful</string>
+    <string name="api_test_failed">API connection failed</string>
 
     <!-- NextCloud Gym Activity Strings -->
     <string name="nextcloud_gym_title">NextCloud Gym</string>
     <string name="nextcloud_settings">NextCloud Settings</string>
-    <string name="checking_connection">Checking connection...</string>
-    <string name="nextcloud_not_configured">NextCloud is not configured</string>
-    <string name="connected_to_nextcloud">Connected to NextCloud</string>
-    <string name="connection_error">Connection error: %1$s</string>
+    <string name="checking_connection">Checking connection…</string>
+    <string name="photo_management">Photo Management</string>
+    <string name="upload">Upload</string>
     <string name="select_photos">Select Photos</string>
-    <string name="selected_photo">Selected photo</string>
+    <string name="connected_to_nextcloud">✓ Connected to NextCloud</string>
+    <string name="nextcloud_not_configured">NextCloud not configured</string>
+    <string name="connection_error">Connection error: %s</string>
+    <string name="ready_to_upload">Ready to upload %d photos</string>
     <string name="no_photos_selected">No photos selected</string>
-    <string name="upload_starting">Starting upload...</string>
-    <string name="upload_progress">Uploading %1$d of %2$d (%3$d success, %4$d failed)</string>
-    <string name="upload_complete">Upload complete! %1$d success, %2$d failed</string>
-    <string name="ready_to_upload">Ready to upload %1$d photos</string>
+    <string name="upload_starting">Starting upload…</string>
+    <string name="uploading_photos">Uploading Photos</string>
+    <string name="deleting_photos">Deleting Photos from Device</string>
+    <string name="preparing_to_delete">Preparing to delete %d photos…</string>
+    <string name="photo_removed">Photo removed from selection</string>
+    <string name="upload_progress">Uploading %d/%d (✓%d ✗%d)</string>
+    <string name="upload_complete">Upload complete: %d successful, %d failed</string>
 
     <!-- NextCloud Gym Settings Activity Strings -->
     <string name="nextcloud_gym_settings_title">NextCloud Gym Settings</string>
     <string name="nextcloud_configuration">NextCloud Configuration</string>
     <string name="nextcloud_username">Username</string>
     <string name="password">Password</string>
-    <string name="password_hint">Saisissez votre mot de passe</string>
+    <string name="password_hint">Input your password</string>
 </resources>

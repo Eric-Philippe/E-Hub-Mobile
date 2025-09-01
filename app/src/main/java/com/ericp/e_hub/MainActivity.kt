@@ -46,13 +46,12 @@ class MainActivity : Activity() {
             startActivity(intent)
         }
 
-        // Exemple d'utilisation de l'API au démarrage
         checkApiAndFetchData()
     }
 
     private fun checkApiAndFetchData() {
         if (!apiHelper.isApiConfigured()) {
-            Toast.makeText(this, "Configurez votre API Key dans les paramètres", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Configure the API in settings", Toast.LENGTH_LONG).show()
             return
         }
     }
