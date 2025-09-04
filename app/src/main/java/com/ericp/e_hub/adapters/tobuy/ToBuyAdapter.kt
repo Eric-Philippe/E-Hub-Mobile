@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.R
@@ -43,7 +44,7 @@ class ToBuyAdapter(
 
             // Set price
             if (item.estimatedPrice != null) {
-                estimatedPrice.text = "$${item.estimatedPrice}"
+                estimatedPrice.text = itemView.context.getString(R.string.price, item.estimatedPrice)
                 estimatedPrice.visibility = View.VISIBLE
             } else {
                 estimatedPrice.visibility = View.GONE
@@ -69,15 +70,20 @@ class ToBuyAdapter(
             }
 
             // Set link count
-            linkCount.text = "${item.links.size} ${if (item.links.size == 1) "link" else "links"}"
+            val linkCountText = if (item.links.size == 1) {
+                itemView.context.getString(R.string.link_count_single, item.links.size)
+            } else {
+                itemView.context.getString(R.string.link_count_plural, item.links.size)
+            }
+            linkCount.text = linkCountText
 
             // Set buy status
             if (item.bought != null) {
-                buyStatus.text = "Bought"
-                buyStatus.setTextColor(Color.parseColor("#4CAF50"))
+                buyStatus.text = itemView.context.getString(R.string.bought)
+                buyStatus.setTextColor("#4CAF50".toColorInt())
             } else {
-                buyStatus.text = "Not Bought"
-                buyStatus.setTextColor(Color.parseColor("#FF5722"))
+                buyStatus.text = itemView.context.getString(R.string.not_bought)
+                buyStatus.setTextColor("#FF5722".toColorInt())
             }
 
             // Set click listener

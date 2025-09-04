@@ -19,6 +19,7 @@ import com.ericp.e_hub.dto.ToBuyDto
 import com.ericp.e_hub.dto.ToBuyCategoryDto
 import com.ericp.e_hub.managers.AddToBuyModalManager
 import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.Endpoints
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -130,7 +131,7 @@ class ToBuyActivity : FragmentActivity() {
     private fun deleteItem(position: Int, item: ToBuyDto) {
         if (item.id != null) {
             apiHelper.deleteAsync(
-                endpoint = "api/tobuy/${item.id}",
+                endpoint = "${Endpoints.TOBUY}/${item.id}",
                 onSuccess = {
                     runOnUiThread {
                         allToBuyItems.removeAt(position)
@@ -157,7 +158,7 @@ class ToBuyActivity : FragmentActivity() {
     private fun updateToBuyItem(position: Int, updatedItem: ToBuyDto) {
         if (updatedItem.id != null) {
             apiHelper.putAsync(
-                endpoint = "api/tobuy/${updatedItem.id}",
+                endpoint = "${Endpoints.TOBUY}/${updatedItem.id}",
                 data = updatedItem,
                 onSuccess = { response ->
                     runOnUiThread {
@@ -307,7 +308,7 @@ class ToBuyActivity : FragmentActivity() {
 
     private fun updateTotalPrice(items: List<ToBuyDto>) {
         val totalPrice = items.sumOf { it.estimatedPrice ?: 0 }
-        totalPriceText.text = "€$totalPrice"
+        totalPriceText.text = getString(R.string.price, totalPrice)
     }
 
     private fun addToBuyItem(item: ToBuyDto) {
@@ -327,7 +328,7 @@ class ToBuyActivity : FragmentActivity() {
 
     private fun fetchToBuyItems() {
         apiHelper.fetchDataAsync(
-            endpoint = "api/tobuy",
+            endpoint = Endpoints.TOBUY,
             onSuccess = { response ->
                 try {
                     val gson = Gson()

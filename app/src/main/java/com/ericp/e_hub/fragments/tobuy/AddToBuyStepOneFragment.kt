@@ -59,7 +59,6 @@ class AddToBuyStepOneFragment : DialogFragment() {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window?.let { window ->
             window.setBackgroundDrawableResource(android.R.color.transparent)
-            // Set explicit layout parameters to ensure full width
             val layoutParams = WindowManager.LayoutParams()
             layoutParams.copyFrom(window.attributes)
             layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT

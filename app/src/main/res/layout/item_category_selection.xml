@@ -10,7 +10,7 @@
         android:id="@+id/categoryButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="• Category Name"
+        android:text="@string/category_name"
         android:textSize="14sp"
         android:textColor="#333333"
         android:fontFamily="sans-serif-medium"

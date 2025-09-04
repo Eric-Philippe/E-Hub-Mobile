@@ -76,7 +76,6 @@ class AddToBuyStepThreeFragment : DialogFragment() {
         linkAdapter = LinkEditAdapter(
             formData?.links ?: mutableListOf()
         ) { position ->
-            // Remove link callback
             linkAdapter.removeLink(position)
         }
 

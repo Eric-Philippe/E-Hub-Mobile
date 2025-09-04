@@ -40,10 +40,4 @@ class ApiConfig(context: Context) {
     fun isApiKeyConfigured(): Boolean {
         return !getApiKey().isNullOrBlank()
     }
-
-    fun clearApiKey() {
-        sharedPreferences.edit {
-            remove(KEY_API_KEY)
-        }
-    }
 }

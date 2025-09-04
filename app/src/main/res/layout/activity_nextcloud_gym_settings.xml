@@ -160,7 +160,8 @@
                         android:textColorHint="#999999"
                         android:background="@drawable/bg_input"
                         android:padding="12dp"
-                        android:inputType="textPassword" />
+                        android:inputType="textPassword"
+                        android:autofillHints="password" />
 
             </LinearLayout>
 
@@ -211,12 +212,6 @@
 
         </LinearLayout>
 
-        <!-- Spacer to push back button to bottom -->
-        <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
         <!-- Back Button - Now inside the white container at the bottom -->
         <Button
                 android:id="@+id/backButton"
@@ -228,7 +223,8 @@
                 android:fontFamily="sans-serif"
                 android:textAllCaps="false"
                 android:background="@drawable/btn_outline"
-                android:elevation="0dp" />
+                android:elevation="0dp"
+                android:layout_marginTop="24dp" />
 
     </LinearLayout>
 

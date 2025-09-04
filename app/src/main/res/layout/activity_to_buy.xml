@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA"
     android:fitsSystemWindows="true">
 
     <!-- Header Section -->
@@ -21,7 +20,7 @@
             android:id="@+id/backButton"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:text="← Back"
+            android:text="@string/back_button"
             android:background="@drawable/btn_outline"
             android:textColor="#333333"
             android:textSize="14sp"
@@ -38,7 +37,7 @@
             android:id="@+id/titleTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="To Buy"
+            android:text="@string/to_buy_title"
             android:textSize="24sp"
             android:textColor="#1A1A1A"
             android:fontFamily="sans-serif-light"
@@ -53,7 +52,7 @@
             android:id="@+id/totalPriceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$0"
+            android:text="@string/zero_price"
             android:textSize="18sp"
             android:textColor="#2196F3"
             android:textStyle="bold"
@@ -80,7 +79,7 @@
             android:id="@+id/searchEditText"
             android:layout_width="match_parent"
             android:layout_height="44dp"
-            android:hint="Search items..."
+            android:hint="@string/search_items_hint"
             android:background="@drawable/btn_outline"
             android:padding="12dp"
             android:textSize="14sp"
@@ -88,7 +87,9 @@
             android:textColorHint="#999999"
             android:drawableStart="@android:drawable/ic_menu_search"
             android:drawablePadding="8dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="12dp"
+            android:inputType="text"
+            android:importantForAutofill="no" />
 
         <!-- Filter Row -->
         <LinearLayout
@@ -101,7 +102,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Filter:"
+                android:text="@string/filter_label"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:layout_marginEnd="8dp" />
@@ -110,7 +111,7 @@
                 android:id="@+id/filterNotBoughtButton"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="Not Bought"
+                android:text="@string/not_bought"
                 android:textSize="12sp"
                 android:background="@drawable/selector_filter_button"
                 android:textColor="#2196F3"
@@ -122,7 +123,7 @@
                 android:id="@+id/filterAllButton"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="All Items"
+                android:text="@string/all_items"
                 android:textSize="12sp"
                 android:background="@drawable/selector_filter_button"
                 android:textColor="#666666"
@@ -141,7 +142,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sort:"
+                android:text="@string/sort"
                 android:textSize="14sp"
                 android:textColor="#666666"
                 android:layout_marginEnd="8dp" />
@@ -150,7 +151,7 @@
                 android:id="@+id/sortButton"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="Sort by Price"
+                android:text="@string/sort_by_price"
                 android:textSize="12sp"
                 android:background="@drawable/btn_outline"
                 android:textColor="#666666"
@@ -166,6 +167,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/searchFilterLayout"
+        android:background="#FAFAFA"
         android:padding="16dp">
 
         <!-- Empty State Message -->
@@ -181,7 +183,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📝"
+                android:text="@string/empty_state_icon"
                 android:textSize="64sp"
                 android:layout_marginBottom="16dp" />
 
@@ -189,7 +191,7 @@
                 android:id="@+id/emptyStateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No items to buy yet"
+                android:text="@string/no_items_to_buy"
                 android:textSize="18sp"
                 android:textColor="#666666"
                 android:fontFamily="sans-serif-light"
@@ -198,7 +200,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tap the + button to add your first item"
+                android:text="@string/tap_plus_to_add"
                 android:textSize="14sp"
                 android:textColor="#999999"
                 android:fontFamily="sans-serif" />
@@ -223,6 +225,7 @@
             android:layout_alignParentEnd="true"
             android:layout_margin="24dp"
             android:src="@android:drawable/ic_input_add"
+            android:contentDescription="@string/add_item"
             app:tint="#FFFFFF"
             app:backgroundTint="#2196F3"
             app:elevation="6dp"

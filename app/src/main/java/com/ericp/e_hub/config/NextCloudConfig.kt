@@ -68,13 +68,4 @@ class NextCloudConfig(context: Context) {
                !getUsername().isNullOrBlank() &&
                !getPassword().isNullOrBlank()
     }
-
-    fun clearCredentials() {
-        sharedPreferences.edit {
-            remove(KEY_USERNAME)
-            remove(KEY_PASSWORD)
-        }
-    }
-
-
 }

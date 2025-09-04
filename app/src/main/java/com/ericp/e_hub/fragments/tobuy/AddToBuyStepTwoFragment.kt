@@ -1,7 +1,6 @@
 package com.ericp.e_hub.fragments.tobuy
 
 import android.app.Dialog
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,8 +18,10 @@ import com.ericp.e_hub.adapters.tobuy.CategorySelectionAdapter
 import com.ericp.e_hub.dto.ToBuyCategoryDto
 import com.ericp.e_hub.models.ToBuyFormData
 import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.Endpoints
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.core.graphics.toColorInt
 
 class AddToBuyStepTwoFragment : DialogFragment() {
 
@@ -73,7 +74,7 @@ class AddToBuyStepTwoFragment : DialogFragment() {
         setupRecyclerView()
         setupListeners()
 
-        // Pre-fill random color when arriving on modal
+        // Pre-fill random color
         selectRandomColor()
     }
 
@@ -119,7 +120,7 @@ class AddToBuyStepTwoFragment : DialogFragment() {
 
     private fun fetchCategoriesFromApi() {
         apiHelper.fetchDataAsync(
-            endpoint = EHubApiHelper.Companion.Endpoints.TOBUY_CATEGORIES,
+            endpoint = Endpoints.TOBUY_CATEGORIES,
             onSuccess = { response ->
                 try {
                     val gson = Gson()
@@ -224,26 +225,26 @@ class AddToBuyStepTwoFragment : DialogFragment() {
 
     private fun selectColor(color: String) {
         newCategoryColorEditText.setText(color)
-        colorPreviewIndicator.setBackgroundColor(Color.parseColor(color))
+        colorPreviewIndicator.setBackgroundColor(color.toColorInt())
     }
 
     private fun selectRandomColor() {
         val randomColor = String.format("#%06X", (0xFFFFFF and (Math.random() * 16777215).toInt()))
         newCategoryColorEditText.setText(randomColor)
-        colorPreviewIndicator.setBackgroundColor(Color.parseColor(randomColor))
+        colorPreviewIndicator.setBackgroundColor(randomColor.toColorInt())
     }
 
     private fun updateColorPreview(colorText: String) {
         try {
             val color = if (colorText.startsWith("#") && (colorText.length == 7 || colorText.length == 4)) {
-                Color.parseColor(colorText)
+                colorText.toColorInt()
             } else {
-                Color.parseColor("#666666") // Default gray color
+                "#666666".toColorInt() // Default gray color
             }
             colorPreviewIndicator.setBackgroundColor(color)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             // Invalid color format, use default gray
-            colorPreviewIndicator.setBackgroundColor(Color.parseColor("#666666"))
+            colorPreviewIndicator.setBackgroundColor("#666666".toColorInt())
         }
     }
 

@@ -101,24 +101,4 @@ class ApiCache(context: Context) {
             e.printStackTrace()
         }
     }
-
-    fun cleanExpired() {
-        val index = getCacheIndex()
-        val currentTime = System.currentTimeMillis()
-        val toRemove = mutableListOf<String>()
-
-        index.forEach { (key, entry) ->
-            if (currentTime - entry.timestamp > entry.ttl) {
-                toRemove.add(key)
-            }
-        }
-
-        toRemove.forEach { key ->
-            index.remove(key)
-        }
-
-        if (toRemove.isNotEmpty()) {
-            saveCacheIndex(index)
-        }
-    }
 }

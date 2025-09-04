@@ -251,7 +251,7 @@ class NextCloudGymActivity : Activity() {
                             failCount
                         )
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     failCount++
                     withContext(Dispatchers.Main) {
                         uploadProgressBar.progress = index + 1
@@ -307,7 +307,7 @@ class NextCloudGymActivity : Activity() {
             try {
                 val pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris)
                 startIntentSenderForResult(pendingIntent.intentSender, REQUEST_DELETE_PHOTOS, null, 0, 0, 0)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 // This can happen if URIs are not from MediaStore (e.g. Google Photos).
                 // Fallback to individual deletion.
                 var couldNotDelete = false

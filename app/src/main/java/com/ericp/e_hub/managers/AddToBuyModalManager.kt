@@ -8,6 +8,7 @@ import com.ericp.e_hub.fragments.tobuy.AddToBuyStepTwoFragment
 import com.ericp.e_hub.fragments.tobuy.AddToBuyStepThreeFragment
 import com.ericp.e_hub.models.ToBuyFormData
 import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.Endpoints
 import java.util.UUID
 
 class AddToBuyModalManager(
@@ -129,7 +130,7 @@ class AddToBuyModalManager(
         } else {
             // Create new item
             apiHelper.postDataAsync(
-                endpoint = EHubApiHelper.Companion.Endpoints.TOBUY,
+                endpoint = Endpoints.TOBUY,
                 data = toBuyDto,
                 onSuccess = { response ->
                     // Handle successful creation

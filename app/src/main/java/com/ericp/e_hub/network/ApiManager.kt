@@ -6,7 +6,7 @@ import android.net.NetworkCapabilities
 import com.ericp.e_hub.cache.ApiCache
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.config.NextCloudConfig
-import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.Endpoints
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import okhttp3.*
@@ -266,7 +266,7 @@ class ApiManager private constructor() {
 
     suspend fun testConnection(context: Context): ApiResult {
         // TODO: Replace with a proper endpoint to test connectivity
-        return get(context, EHubApiHelper.Companion.Endpoints.TODO, useCache = false)
+        return get(context, Endpoints.TODO, useCache = false)
     }
 
     fun testNextCloudConnection(context: Context, nextCloudConfig: NextCloudConfig): ApiResult {

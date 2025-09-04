@@ -57,22 +57,26 @@
 
     </LinearLayout>
 
-    <!-- Game Grid Container -->
-    <FrameLayout
+    <!-- Centered Card Container -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_margin="16dp">
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="32dp">
 
         <!-- Card-like container for the grid -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
             android:elevation="8dp"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
 
             <GridLayout
                 android:id="@+id/nonogramGrid"
@@ -83,17 +87,15 @@
                 android:background="@android:color/transparent" />
 
         </LinearLayout>
+    </LinearLayout>
 
-    </FrameLayout>
-
-    <!-- Bottom Action Bar -->
+    <!-- Sticky Bottom Action Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="24dp"
-        android:paddingVertical="16dp"
-        android:paddingBottom="32dp">
+        android:layout_gravity="bottom"> <!-- ensures sticky to bottom -->
 
         <!-- First Row: Reset and New Board -->
         <LinearLayout

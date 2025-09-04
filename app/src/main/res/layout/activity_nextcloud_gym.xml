@@ -132,8 +132,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/photoRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:background="#F8F8F8"
             android:padding="12dp"
             android:clipToPadding="false" />

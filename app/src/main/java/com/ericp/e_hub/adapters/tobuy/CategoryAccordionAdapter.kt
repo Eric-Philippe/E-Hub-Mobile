@@ -146,7 +146,7 @@ class CategoryAccordionAdapter(
     private fun createSubItemBackground(categoryColor: String?): GradientDrawable {
         val drawable = GradientDrawable()
         drawable.shape = GradientDrawable.RECTANGLE
-        drawable.cornerRadius = 24f // 8dp converted to pixels
+        drawable.cornerRadius = 24f
 
         // Pure white background
         drawable.setColor(Color.WHITE)
@@ -154,9 +154,9 @@ class CategoryAccordionAdapter(
         try {
             if (!categoryColor.isNullOrEmpty()) {
                 val baseColor = categoryColor.toColorInt()
-                // Extremely subtle pastel border (90% white blend)
+                // Subtle pastel border
                 val verySubtlePastelColor = createPastelColor(baseColor, 0.2f)
-                drawable.setStroke(1, verySubtlePastelColor) // Very thin border
+                drawable.setStroke(1, verySubtlePastelColor)
             } else {
                 // Almost invisible default border
                 drawable.setStroke(1, "#F5F5F5".toColorInt())
@@ -216,39 +216,100 @@ class CategoryAccordionAdapter(
             }
             expandIcon.text = "▶"
 
-            // Set click listener to toggle expansion with ability to close
+            // Set click listener to toggle expansion with proper animation
             itemView.setOnClickListener {
-                val wasExpanded = section.isExpanded
-                val oldExpandedCount = expandedItems.size
-
-                // Close all other sections
-                sections.forEach { it.isExpanded = false }
-
-                // Toggle this section (allows closing if it was already open)
-                section.isExpanded = !wasExpanded
-
-                updateExpandedItems()
-
-                val newExpandedCount = expandedItems.size
-                if (newExpandedCount > oldExpandedCount) {
-                    // Items were added
-                    notifyItemRangeInserted(oldExpandedCount, newExpandedCount - oldExpandedCount)
-                } else if (newExpandedCount < oldExpandedCount) {
-                    // Items were removed
-                    notifyItemRangeRemoved(newExpandedCount, oldExpandedCount - newExpandedCount)
-                }
-                notifyItemChanged(adapterPosition) // Update the header
+                toggleSection(section)
             }
         }
 
-        private fun animateSection(section: CategorySection) {
-            val animator = ValueAnimator.ofFloat(0f, 1f)
-            animator.duration = 150
-            animator.addUpdateListener { animation ->
-                val progress = animation.animatedValue as Float
-                itemView.alpha = 0.7f + (0.3f * progress)
+        private fun toggleSection(targetSection: CategorySection) {
+            val wasExpanded = targetSection.isExpanded
+
+            // First, close all expanded sections and collect their positions for removal
+            val itemsToRemove = mutableListOf<Pair<Int, Int>>() // position, count
+
+            for (i in sections.indices) {
+                val section = sections[i]
+                if (section.isExpanded && section != targetSection) {
+                    // Calculate the position of this section's items in expandedItems
+                    var positionInExpanded = 0
+                    for (j in 0 until i) {
+                        positionInExpanded++ // Count the header
+                        if (sections[j].isExpanded) {
+                            positionInExpanded += sections[j].items.size
+                        }
+                    }
+                    positionInExpanded++ // Skip the header of current section
+
+                    itemsToRemove.add(Pair(positionInExpanded, section.items.size))
+                    section.isExpanded = false
+                }
             }
-            animator.start()
+
+            itemsToRemove.sortedByDescending { it.first }.forEach { (position, count) ->
+                // Remove from expandedItems list
+                repeat(count) {
+                    if (position < expandedItems.size) {
+                        expandedItems.removeAt(position)
+                    }
+                }
+                // Notify adapter
+                notifyItemRangeRemoved(position, count)
+            }
+
+            if (!wasExpanded) {
+                // Expand the target section
+                targetSection.isExpanded = true
+
+                // Calculate the position where items should be inserted
+                var insertPosition = 0
+                for (i in sections.indices) {
+                    if (sections[i] == targetSection) {
+                        insertPosition++ // Skip the header
+                        break
+                    }
+                    insertPosition++ // Count the header
+                    if (sections[i].isExpanded) {
+                        insertPosition += sections[i].items.size
+                    }
+                }
+
+                // Add items to expandedItems list
+                expandedItems.addAll(insertPosition, targetSection.items)
+
+                // Notify adapter of insertion
+                notifyItemRangeInserted(insertPosition, targetSection.items.size)
+
+            } else {
+                // Collapse the target section
+                targetSection.isExpanded = false
+
+                // Calculate the position of items to remove
+                var removePosition = 0
+                for (i in sections.indices) {
+                    if (sections[i] == targetSection) {
+                        removePosition++ // Skip the header
+                        break
+                    }
+                    removePosition++ // Count the header
+                    if (sections[i].isExpanded) {
+                        removePosition += sections[i].items.size
+                    }
+                }
+
+                // Remove items from expandedItems list
+                repeat(targetSection.items.size) {
+                    if (removePosition < expandedItems.size) {
+                        expandedItems.removeAt(removePosition)
+                    }
+                }
+
+                // Notify adapter of removal
+                notifyItemRangeRemoved(removePosition, targetSection.items.size)
+            }
+
+            // Update the header to reflect the new state
+            notifyItemChanged(bindingAdapterPosition)
         }
     }
 
@@ -310,14 +371,14 @@ class CategoryAccordionAdapter(
                 }
             }
 
-            // Items slide down from the top
+            // Items slide down from the top with immediate appearance
             itemView.alpha = 0f
-            itemView.translationY = -50f // Start above, slide down
+            itemView.translationY = -30f
             itemView.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setDuration(250)
-                .setStartDelay((adapterPosition * 80).toLong()) // Stagger effect using adapterPosition
+                .setDuration(150)
+                .setStartDelay(0)
                 .start()
 
             // Set click listeners

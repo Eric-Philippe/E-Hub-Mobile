@@ -172,14 +172,4 @@ class EHubApiHelper(private val context: Context) {
             }
         }
     }
-
-    companion object {
-        object Endpoints {
-            const val HEALTH = "health"
-            const val TODO = "api/todo"
-            const val NONOGRAM_SUBMIT = "api/nonogram"
-            const val TOBUY = "api/tobuy"
-            const val TOBUY_CATEGORIES = "api/tobuy/categories"
-        }
-    }
 }

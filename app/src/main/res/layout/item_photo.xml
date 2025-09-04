@@ -21,7 +21,7 @@
         android:layout_gravity="top|end"
         android:layout_margin="8dp"
         android:background="@drawable/btn_primary"
-        android:text="✕"
+        android:text="@string/cross"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"
