@@ -60,10 +60,59 @@ class EHubApiHelper(private val context: Context) {
             return
         }
 
+        // Debug logging to verify API key is being used
+        val apiKey = apiConfig.getApiKey()
+        android.util.Log.d("EHubApiHelper", "POST to $endpoint with API key: ${if (apiKey.isNullOrBlank()) "MISSING" else "PRESENT (${apiKey.take(10)}...)"}")
+
         CoroutineScope(Dispatchers.Main).launch {
             when (val result = apiManager.post(context, endpoint, data)) {
                 is ApiManager.ApiResult.Success -> {
                     onSuccess(result.data)
+                }
+                is ApiManager.ApiResult.Error -> {
+                    onError("API Error: ${result.message}")
+                }
+            }
+        }
+    }
+
+    fun putAsync(
+        endpoint: String,
+        data: Any,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (!isApiConfigured()) {
+            onError("API not configured. Please set your API key in settings.")
+            return
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            when (val result = apiManager.put(context, endpoint, data)) {
+                is ApiManager.ApiResult.Success -> {
+                    onSuccess(result.data)
+                }
+                is ApiManager.ApiResult.Error -> {
+                    onError("API Error: ${result.message}")
+                }
+            }
+        }
+    }
+
+    fun deleteAsync(
+        endpoint: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (!isApiConfigured()) {
+            onError("API not configured. Please set your API key in settings.")
+            return
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            when (val result = apiManager.delete(context, endpoint)) {
+                is ApiManager.ApiResult.Success -> {
+                    onSuccess()
                 }
                 is ApiManager.ApiResult.Error -> {
                     onError("API Error: ${result.message}")
@@ -77,6 +126,21 @@ class EHubApiHelper(private val context: Context) {
      */
     fun clearApiCache() {
         apiManager.clearCache(context)
+    }
+
+    /**
+     * Clear specific endpoint cache
+     */
+    fun clearEndpointCache(endpoint: String) {
+        apiManager.clearEndpointCache(context, endpoint)
+    }
+
+    /**
+     * Clear all ToBuy related cache
+     */
+    fun clearToBuyCache() {
+        clearEndpointCache(Endpoints.TOBUY)
+        clearEndpointCache(Endpoints.TOBUY_CATEGORIES)
     }
 
     /**
@@ -114,6 +178,8 @@ class EHubApiHelper(private val context: Context) {
             const val HEALTH = "health"
             const val TODO = "api/todo"
             const val NONOGRAM_SUBMIT = "api/nonogram"
+            const val TOBUY = "api/tobuy"
+            const val TOBUY_CATEGORIES = "api/tobuy/categories"
         }
     }
 }

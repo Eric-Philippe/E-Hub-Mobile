@@ -32,8 +32,6 @@ class PhotoAdapter(private val onPhotoRemoved: (Uri, Int) -> Unit = { _, _ -> })
         }
     }
 
-    fun getPhotos(): List<Uri> = photos.toList()
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_photo, parent, false)

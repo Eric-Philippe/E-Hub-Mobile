@@ -56,4 +56,12 @@
             android:text="@string/nextcloud_gym_settings_title"
             android:textSize="16sp"
             android:padding="16dp" />
+
+    <Button
+        android:id="@+id/toBuyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/to_buy_list"
+        android:textSize="16sp"
+        android:padding="16dp" />
 </LinearLayout>

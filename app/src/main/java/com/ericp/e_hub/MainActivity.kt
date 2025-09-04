@@ -46,6 +46,12 @@ class MainActivity : Activity() {
             startActivity(intent)
         }
 
+        val toBuyButton = findViewById<Button>(R.id.toBuyButton)
+        toBuyButton.setOnClickListener {
+            val intent = Intent(this, ToBuyActivity::class.java)
+            startActivity(intent)
+        }
+
         checkApiAndFetchData()
     }
 

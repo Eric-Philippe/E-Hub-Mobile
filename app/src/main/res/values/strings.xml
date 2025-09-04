@@ -4,6 +4,8 @@
     <string name="hello_world">Hello World!</string>
     <string name="welcome_to_ehub">Welcome to EHub App</string>
     <string name="play_nonogram">Play Random Nonogram</string>
+    <string name="upload">Upload</string>
+    <string name="connection_error">✗ Connection error</string>
 
     <!-- Nonogram Activity Strings -->
     <string name="current_time_placeholder">12:34</string>
@@ -49,22 +51,23 @@
     <!-- NextCloud Gym Activity Strings -->
     <string name="nextcloud_gym_title">NextCloud Gym</string>
     <string name="nextcloud_settings">NextCloud Settings</string>
-    <string name="checking_connection">Checking connection…</string>
     <string name="photo_management">Photo Management</string>
-    <string name="upload">Upload</string>
     <string name="select_photos">Select Photos</string>
-    <string name="connected_to_nextcloud">✓ Connected to NextCloud</string>
+    <string name="uploading_photos">Uploading photos...</string>
+    <string name="checking_connection">Checking connection...</string>
+    <string name="ready_to_upload">Ready to upload photos</string>
     <string name="nextcloud_not_configured">NextCloud not configured</string>
-    <string name="connection_error">Connection error: %s</string>
-    <string name="ready_to_upload">Ready to upload %d photos</string>
+    <string name="connected_to_nextcloud">✓ Connected to NextCloud</string>
     <string name="no_photos_selected">No photos selected</string>
-    <string name="upload_starting">Starting upload…</string>
-    <string name="uploading_photos">Uploading Photos</string>
-    <string name="deleting_photos">Deleting Photos from Device</string>
-    <string name="preparing_to_delete">Preparing to delete %d photos…</string>
-    <string name="photo_removed">Photo removed from selection</string>
-    <string name="upload_progress">Uploading %d/%d (✓%d ✗%d)</string>
-    <string name="upload_complete">Upload complete: %d successful, %d failed</string>
+    <string name="upload_starting">Starting upload...</string>
+    <string name="upload_progress">Uploading %1$d of %2$d photos</string>
+    <string name="deleting_photos">Deleting photos...</string>
+    <string name="preparing_to_delete">Preparing to delete photos...</string>
+    <string name="upload_complete">✓ Upload complete</string>
+    <string name="photo_removed">✓ Photo removed</string>
+
+    <!-- Category Selection Strings -->
+    <string name="category_button_text">● %1$s</string>
 
     <!-- NextCloud Gym Settings Activity Strings -->
     <string name="nextcloud_gym_settings_title">NextCloud Gym Settings</string>
@@ -72,4 +75,46 @@
     <string name="nextcloud_username">Username</string>
     <string name="password">Password</string>
     <string name="password_hint">Input your password</string>
+
+    <!-- To Buy List Strings -->
+    <string name="to_buy_list">To Buy List</string>
+    <string name="add_new_item_step_3">Add New Item - Step 3 of 3</string>
+    <string name="add_purchase_links">Add Purchase Links</string>
+    <string name="your_links">Your Links:</string>
+    <string name="add_new_link">Add New Link:</string>
+    <string name="favourite">Favourite</string>
+    <string name="remove">Remove</string>
+    <string name="add_link">+ Add Link</string>
+    <string name="back_arrow">← Back</string>
+    <string name="create_item">Create Item</string>
+    <string name="add_new_item_step_2">Add New Item - Step 2 of 3</string>
+    <string name="select_categories">Select Categories</string>
+    <string name="available_categories">Available Categories:</string>
+    <string name="create_new_category">Create New Category:</string>
+    <string name="quick_colors">Quick colors:</string>
+    <string name="random">🎲 Random</string>
+    <string name="add_category">+ Add Category</string>
+    <string name="next">Next →</string>
+    <string name="expand">›</string>
+    <string name="url_hint">URL</string>
+    <string name="price_hint">Price</string>
+    <string name="category_name_hint">Category Name</string>
+    <string name="category_description_hint">Category Description</string>
+    <string name="color_hex_hint">Color (#hex)</string>
+    <string name="search_items_hint">Search items…</string>
+    <string name="title_required_hint">Title *</string>
+    <string name="description_hint">Description</string>
+    <string name="purchase_criteria_hint">Purchase Criteria</string>
+    <string name="estimated_price_hint">Estimated Price</string>
+    <string name="interest_level_hint">Interest Level</string>
+
+    <!-- Category Accordion Adapter Strings -->
+    <string name="category_total_price">Total: €%d</string>
+    <string name="price_in_euros">%d€</string>
+
+    <!-- Plurals -->
+    <plurals name="item_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="4dp"
+    android:layout_margin="4dp">
+
+    <Button
+        android:id="@+id/categoryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="• Category Name"
+        android:textSize="14sp"
+        android:textColor="#333333"
+        android:fontFamily="sans-serif-medium"
+        android:background="@drawable/btn_outline"
+        android:layout_gravity="center_vertical"
+        android:minHeight="40dp"
+        android:textAllCaps="false"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp" />
+
+</LinearLayout>

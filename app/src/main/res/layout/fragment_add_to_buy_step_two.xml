@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="2dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_new_item_step_2"
+            android:textSize="22sp"
+            android:textColor="#1A1A1A"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:layout_marginBottom="10dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/select_categories"
+            android:textSize="16sp"
+            android:textColor="#666666"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Content with flexible space -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Categories List -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/available_categories"
+                    android:textSize="18sp"
+                    android:textColor="#333333"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="16dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/categoriesRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:nestedScrollingEnabled="false" />
+
+                <!-- Add New Category Section -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_new_category"
+                    android:textSize="18sp"
+                    android:textColor="#333333"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Category Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:textColorHint="#666666"
+                    app:boxStrokeColor="#333333"
+                    app:hintTextColor="#666666"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/newCategoryEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Category Name"
+                        android:inputType="text"
+                        android:textColor="#333333"
+                        android:textColorHint="#666666"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Category Description -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:textColorHint="#666666"
+                    app:boxStrokeColor="#333333"
+                    app:hintTextColor="#666666"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/newCategoryDescriptionEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Category Description"
+                        android:inputType="textMultiLine"
+                        android:textColor="#333333"
+                        android:textColorHint="#666666"
+                        android:textSize="16sp"
+                        android:minLines="2"
+                        android:maxLines="3" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Color Field with Indicator -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColorHint="#666666"
+                        app:boxStrokeColor="#333333"
+                        app:hintTextColor="#666666"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/newCategoryColorEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Color (#hex)"
+                            android:inputType="text"
+                            android:textColor="#333333"
+                            android:textColorHint="#666666"
+                            android:textSize="16sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Color Preview Indicator -->
+                    <View
+                        android:id="@+id/colorPreviewIndicator"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="#666666"
+                        android:elevation="2dp" />
+
+                </LinearLayout>
+
+                <!-- Color Picker Row - Smaller squares -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/quick_colors"
+                        android:textSize="14sp"
+                        android:textColor="#666666"
+                        android:layout_marginBottom="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="start">
+
+                        <Button
+                            android:id="@+id/colorButton1"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="#2196F3"
+                            android:layout_marginEnd="6dp" />
+
+                        <Button
+                            android:id="@+id/colorButton2"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="#4CAF50"
+                            android:layout_marginEnd="6dp" />
+
+                        <Button
+                            android:id="@+id/colorButton3"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="#FF9800"
+                            android:layout_marginEnd="6dp" />
+
+                        <Button
+                            android:id="@+id/colorButton4"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="#9C27B0"
+                            android:layout_marginEnd="6dp" />
+
+                        <Button
+                            android:id="@+id/colorButton5"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="#F44336"
+                            android:layout_marginEnd="12dp" />
+
+                        <Button
+                            android:id="@+id/randomColorButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="24dp"
+                            android:text="@string/random"
+                            android:textSize="11sp"
+                            android:background="@drawable/btn_outline"
+                            android:textColor="#666666"
+                            android:paddingHorizontal="6dp"
+                            android:minWidth="0dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/addCategoryButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_category"
+                    android:textColor="#2196F3"
+                    android:textSize="16sp"
+                    android:background="@drawable/btn_outline"
+                    android:layout_gravity="end"
+                    android:layout_marginBottom="24dp"
+                    android:minWidth="140dp"
+                    android:minHeight="48dp" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/back_arrow"
+                android:textColor="#666666"
+                android:textSize="16sp"
+                android:background="@drawable/btn_outline"
+                android:minWidth="120dp"
+                android:minHeight="48dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/nextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/next"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:background="@drawable/btn_primary"
+                android:minWidth="120dp"
+                android:minHeight="48dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

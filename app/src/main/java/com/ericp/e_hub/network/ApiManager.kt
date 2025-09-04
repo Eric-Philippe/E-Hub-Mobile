@@ -196,6 +196,74 @@ class ApiManager private constructor() {
         }
     }
 
+    suspend fun put(
+        context: Context,
+        endpoint: String,
+        data: Any
+    ): ApiResult {
+        val apiConfig = ApiConfig(context.applicationContext)
+
+        if (!isNetworkAvailable(context)) {
+            return ApiResult.Error("No network connection")
+        }
+
+        return try {
+            val service = createRetrofitService(context)
+            val jsonBody = gson.toJson(data)
+            val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
+
+            val response = service.put(
+                url = "${apiConfig.getServerUrl()}/$endpoint",
+                authorization = getAuthHeader(context),
+                body = requestBody
+            )
+
+            if (response.isSuccessful) {
+                val responseBody = response.body()?.string() ?: ""
+                ApiResult.Success(responseBody)
+            } else {
+                ApiResult.Error("HTTP Error: ${response.code()}")
+            }
+
+        } catch (e: IOException) {
+            ApiResult.Error("Network error: ${e.message}")
+        } catch (e: Exception) {
+            ApiResult.Error("Unexpected error: ${e.message}")
+        }
+    }
+
+    suspend fun delete(
+        context: Context,
+        endpoint: String
+    ): ApiResult {
+        val apiConfig = ApiConfig(context.applicationContext)
+
+        if (!isNetworkAvailable(context)) {
+            return ApiResult.Error("No network connection")
+        }
+
+        return try {
+            val service = createRetrofitService(context)
+
+            val response = service.delete(
+                url = "${apiConfig.getServerUrl()}/$endpoint",
+                authorization = getAuthHeader(context)
+            )
+
+            if (response.isSuccessful) {
+                val responseBody = response.body()?.string() ?: ""
+                ApiResult.Success(responseBody)
+            } else {
+                ApiResult.Error("HTTP Error: ${response.code()}")
+            }
+
+        } catch (e: IOException) {
+            ApiResult.Error("Network error: ${e.message}")
+        } catch (e: Exception) {
+            ApiResult.Error("Unexpected error: ${e.message}")
+        }
+    }
+
     suspend fun testConnection(context: Context): ApiResult {
         // TODO: Replace with a proper endpoint to test connectivity
         return get(context, EHubApiHelper.Companion.Endpoints.TODO, useCache = false)
@@ -238,6 +306,19 @@ class ApiManager private constructor() {
     fun clearCache(context: Context) {
         val apiCache = ApiCache(context.applicationContext)
         apiCache.clear()
+    }
+
+    fun clearEndpointCache(context: Context, endpoint: String) {
+        val apiCache = ApiCache(context.applicationContext)
+        val cacheKeyGet = generateCacheKey(endpoint, "GET")
+        val cacheKeyPost = generateCacheKey(endpoint, "POST")
+        val cacheKeyPut = generateCacheKey(endpoint, "PUT")
+        val cacheKeyDelete = generateCacheKey(endpoint, "DELETE")
+
+        apiCache.remove(cacheKeyGet)
+        apiCache.remove(cacheKeyPost)
+        apiCache.remove(cacheKeyPut)
+        apiCache.remove(cacheKeyDelete)
     }
 
     sealed class ApiResult {
