@@ -4,8 +4,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical"
               android:background="@drawable/bg_gradient"
-              android:fitsSystemWindows="true"
-              android:padding="24dp">
+              android:paddingTop="24dp">
 
     <!-- Header -->
     <TextView

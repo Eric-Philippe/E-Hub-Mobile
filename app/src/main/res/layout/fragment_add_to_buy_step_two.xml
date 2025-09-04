@@ -229,6 +229,7 @@
                             android:background="@drawable/btn_outline"
                             android:textColor="#666666"
                             android:paddingHorizontal="6dp"
+                            android:layout_marginBottom="6dp"
                             android:minWidth="0dp" />
 
                     </LinearLayout>
@@ -245,6 +246,7 @@
                     android:background="@drawable/btn_outline"
                     android:layout_gravity="end"
                     android:layout_marginBottom="24dp"
+                    android:layout_marginRight="2dp"
                     android:minWidth="140dp"
                     android:minHeight="48dp" />
 

@@ -13,9 +13,36 @@ class PhotoAdapter(private val onPhotoRemoved: (Uri, Int) -> Unit = { _, _ -> })
     private val photos = mutableListOf<Uri>()
 
     fun setPhotos(photoUris: List<Uri>) {
+        val oldSize = photos.size
         photos.clear()
         photos.addAll(photoUris)
-        notifyDataSetChanged()
+
+        val newSize = photoUris.size
+
+        when {
+            oldSize == 0 && newSize > 0 -> {
+                // Items added to empty list
+                notifyItemRangeInserted(0, newSize)
+            }
+            oldSize > 0 && newSize == 0 -> {
+                // All items removed
+                notifyItemRangeRemoved(0, oldSize)
+            }
+            oldSize == newSize -> {
+                // Same size, items may have changed
+                notifyItemRangeChanged(0, newSize)
+            }
+            oldSize < newSize -> {
+                // Items changed and some added
+                notifyItemRangeChanged(0, oldSize)
+                notifyItemRangeInserted(oldSize, newSize - oldSize)
+            }
+            else -> {
+                // Items changed and some removed
+                notifyItemRangeChanged(0, newSize)
+                notifyItemRangeRemoved(newSize, oldSize - newSize)
+            }
+        }
     }
 
     fun addPhotos(photoUris: List<Uri>) {

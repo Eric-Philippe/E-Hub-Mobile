@@ -94,10 +94,29 @@ class CategoryAccordionAdapter(
         updateExpandedItems()
         val newItemCount = expandedItems.size
 
-        if (oldItemCount != newItemCount || sections.isEmpty()) {
-            notifyDataSetChanged()
-        } else {
-            notifyItemRangeChanged(0, newItemCount)
+        when {
+            oldItemCount == 0 && newItemCount > 0 -> {
+                // Items added to empty list
+                notifyItemRangeInserted(0, newItemCount)
+            }
+            oldItemCount > 0 && newItemCount == 0 -> {
+                // All items removed
+                notifyItemRangeRemoved(0, oldItemCount)
+            }
+            oldItemCount == newItemCount -> {
+                // Same size, items may have changed
+                notifyItemRangeChanged(0, newItemCount)
+            }
+            oldItemCount < newItemCount -> {
+                // Items changed and some added
+                notifyItemRangeChanged(0, oldItemCount)
+                notifyItemRangeInserted(oldItemCount, newItemCount - oldItemCount)
+            }
+            else -> {
+                // Items changed and some removed
+                notifyItemRangeChanged(0, newItemCount)
+                notifyItemRangeRemoved(newItemCount, oldItemCount - newItemCount)
+            }
         }
     }
 
@@ -154,7 +173,6 @@ class CategoryAccordionAdapter(
         try {
             if (!categoryColor.isNullOrEmpty()) {
                 val baseColor = categoryColor.toColorInt()
-                // Subtle pastel border
                 val verySubtlePastelColor = createPastelColor(baseColor, 0.2f)
                 drawable.setStroke(1, verySubtlePastelColor)
             } else {
