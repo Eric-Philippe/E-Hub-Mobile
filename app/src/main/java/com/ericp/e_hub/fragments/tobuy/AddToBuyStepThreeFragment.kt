@@ -107,7 +107,6 @@ class AddToBuyStepThreeFragment : DialogFragment() {
 
         if (url.isNotEmpty()) {
             val newLink = ToBuyLinkDto(
-                id = UUID.randomUUID(),
                 url = url,
                 price = price,
                 favourite = favourite,

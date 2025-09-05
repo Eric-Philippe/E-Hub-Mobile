@@ -112,9 +112,9 @@ class ToBuyActivity : FragmentActivity() {
     }
 
     private fun editItem(position: Int, item: ToBuyDto) {
-        modalManager.showModal(item) { updatedItem ->
+        modalManager.showModal(item, { updatedItem ->
             updateToBuyItem(position, updatedItem)
-        }
+        })
     }
 
     private fun confirmDeleteItem(position: Int, item: ToBuyDto) {

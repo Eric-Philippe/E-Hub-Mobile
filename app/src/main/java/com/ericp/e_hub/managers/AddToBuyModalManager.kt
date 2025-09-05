@@ -110,6 +110,9 @@ class AddToBuyModalManager(
             boughtString =
                 currentFormData.bought?.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
         }
+
+        System.out.println(currentFormData.links)
+
         val toBuyDto = ToBuyDto(
             id = editingItem?.id,
             title = currentFormData.title,
@@ -121,6 +124,8 @@ class AddToBuyModalManager(
             categories = currentFormData.categories.toList(),
             links = currentFormData.links.toList()
         )
+
+        System.out.println(toBuyDto.links)
 
         if (editingItem != null) {
             // Update existing item

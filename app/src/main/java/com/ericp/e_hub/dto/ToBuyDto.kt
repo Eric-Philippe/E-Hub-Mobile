@@ -4,6 +4,7 @@ import java.util.UUID
 
 data class ToBuyDto(
     val id: UUID? = null,
+    val created: String? = null,
     val title: String,
     val description: String? = null,
     val criteria: String? = null,
@@ -19,6 +20,7 @@ data class ToBuyLinkDto(
     val url: String,
     val price: Short? = null,
     val favourite: Boolean = false,
+    val illustrationUrl: String? = null,
     val toBuyId: UUID? = null
 )
 
