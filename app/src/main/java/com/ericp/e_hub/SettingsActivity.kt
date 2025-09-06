@@ -2,6 +2,8 @@ package com.ericp.e_hub
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -10,6 +12,8 @@ import android.widget.Toast
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.network.ApiManager
 import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.SettingsExporter
+import com.ericp.e_hub.utils.SettingsImporter
 import kotlinx.coroutines.*
 
 class SettingsActivity : Activity() {
@@ -24,11 +28,20 @@ class SettingsActivity : Activity() {
     private lateinit var saveApiButton: Button
     private lateinit var apiStatusText: TextView
 
+    // Import/Export
+    private lateinit var importSettingsButton: Button
+    private lateinit var exportSettingsButton: Button
+
     private lateinit var apiConfig: ApiConfig
     private lateinit var apiManager: ApiManager
     private lateinit var apiHelper: EHubApiHelper
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    companion object {
+        private const val REQUEST_EXPORT_SETTINGS = 1001
+        private const val REQUEST_IMPORT_SETTINGS = 1002
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +61,9 @@ class SettingsActivity : Activity() {
         testApiButton = findViewById(R.id.testApiButton)
         saveApiButton = findViewById(R.id.saveApiButton)
         apiStatusText = findViewById(R.id.apiStatusText)
+
+        importSettingsButton = findViewById(R.id.importSettingsButton)
+        exportSettingsButton = findViewById(R.id.exportSettingsButton)
 
         apiConfig = ApiConfig(this)
         apiManager = ApiManager.getInstance()
@@ -77,11 +93,73 @@ class SettingsActivity : Activity() {
         testApiButton.setOnClickListener {
             testApiConnection()
         }
+
+        importSettingsButton.setOnClickListener {
+            importSettings()
+        }
+
+        exportSettingsButton.setOnClickListener {
+            exportSettings()
+        }
     }
 
     private fun clearCache() {
         apiHelper.clearAllCache()
         Toast.makeText(this, getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun exportSettings() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/xml"
+            putExtra(Intent.EXTRA_TITLE, "ehub_settings.xml")
+        }
+        startActivityForResult(intent, REQUEST_EXPORT_SETTINGS)
+    }
+
+    private fun importSettings() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/xml"
+        }
+        startActivityForResult(intent, REQUEST_IMPORT_SETTINGS)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode != Activity.RESULT_OK || data == null) return
+
+        when (requestCode) {
+            REQUEST_EXPORT_SETTINGS -> {
+                val uri = data.data
+                uri?.let {
+                    try {
+                        contentResolver.openOutputStream(it)?.use { outputStream ->
+                            val xmlString = SettingsExporter(this).exportSettingsToXml()
+                            outputStream.write(xmlString.toByteArray())
+                        }
+                        Toast.makeText(this, "Settings exported successfully.", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Failed to export settings.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            REQUEST_IMPORT_SETTINGS -> {
+                val uri = data.data
+                uri?.let {
+                    try {
+                        contentResolver.openInputStream(it)?.use { inputStream ->
+                            SettingsImporter(this).importSettingsFromXml(inputStream)
+                        }
+                        Toast.makeText(this, "Settings imported successfully.", Toast.LENGTH_SHORT).show()
+                        // Reload settings in UI
+                        loadSettings()
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Failed to import settings: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun saveApiConfiguration() {

@@ -146,6 +146,12 @@
     <string name="clear_cache">Effacer le Cache</string>
     <string name="cache_cleared">Cache effacé</string>
 
+    <!-- Import/Export Strings -->
+    <string name="import_export_settings">Import/Export Settings</string>
+    <string name="import_export_description">Save or load your application settings to a file.</string>
+    <string name="import_settings">Import</string>
+    <string name="export_settings">Export</string>
+
     <!-- Plurals -->
     <plurals name="item_count">
         <item quantity="one">%d item</item>
