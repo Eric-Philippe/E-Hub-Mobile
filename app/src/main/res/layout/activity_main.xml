@@ -52,11 +52,16 @@
 
     </RelativeLayout>
 
-    <!-- Main Content Container -->
+    <!-- Decorative hex pattern divider reduced height -->
+    <com.ericp.e_hub.ui.HexPatternView
+        android:id="@+id/hexPatternView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hex_pattern_height" />
+
+    <!-- Buttons Container anchored at bottom -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="32dp"
         android:gravity="center">
