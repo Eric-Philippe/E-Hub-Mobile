@@ -29,6 +29,43 @@
             android:padding="24dp"
             android:paddingBottom="0dp">
 
+        <!-- Cache Management Section -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="32dp">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cache_management"
+                    android:textSize="20sp"
+                    android:textColor="#333333"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="16dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cache_description"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:layout_marginBottom="16dp" />
+
+            <Button
+                    android:id="@+id/clearCacheButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="@string/clear_cache"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
+                    android:background="@drawable/btn_primary"
+                    android:layout_marginBottom="8dp" />
+
+        </LinearLayout>
+
         <!-- API Configuration Section -->
         <LinearLayout
                 android:layout_width="match_parent"

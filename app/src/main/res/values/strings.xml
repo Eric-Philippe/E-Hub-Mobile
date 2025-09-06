@@ -140,6 +140,12 @@
     <string name="link_count_plural">%1$d links</string>
     <string name="bought">Bought</string>
 
+    <!-- Cache Management Strings -->
+    <string name="cache_management">Gestion du Cache</string>
+    <string name="cache_description">Effacer le cache peut aider à résoudre les problèmes de données obsolètes</string>
+    <string name="clear_cache">Effacer le Cache</string>
+    <string name="cache_cleared">Cache effacé</string>
+
     <!-- Plurals -->
     <plurals name="item_count">
         <item quantity="one">%d item</item>

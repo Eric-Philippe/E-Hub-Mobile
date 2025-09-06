@@ -9,10 +9,14 @@ import android.widget.TextView
 import android.widget.Toast
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.network.ApiManager
+import com.ericp.e_hub.utils.EHubApiHelper
 import kotlinx.coroutines.*
 
 class SettingsActivity : Activity() {
     private lateinit var backButton: Button
+
+    // Cache Management
+    private lateinit var clearCacheButton: Button
 
     private lateinit var serverUrlInput: EditText
     private lateinit var apiKeyInput: EditText
@@ -22,6 +26,7 @@ class SettingsActivity : Activity() {
 
     private lateinit var apiConfig: ApiConfig
     private lateinit var apiManager: ApiManager
+    private lateinit var apiHelper: EHubApiHelper
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -36,6 +41,7 @@ class SettingsActivity : Activity() {
 
     private fun initializeComponents() {
         backButton = findViewById(R.id.backButton)
+        clearCacheButton = findViewById(R.id.clearCacheButton)
 
         serverUrlInput = findViewById(R.id.serverUrlInput)
         apiKeyInput = findViewById(R.id.apiKeyInput)
@@ -45,6 +51,7 @@ class SettingsActivity : Activity() {
 
         apiConfig = ApiConfig(this)
         apiManager = ApiManager.getInstance()
+        apiHelper = EHubApiHelper(this)
     }
 
     private fun loadSettings() {
@@ -59,6 +66,10 @@ class SettingsActivity : Activity() {
             finish()
         }
 
+        clearCacheButton.setOnClickListener {
+            clearCache()
+        }
+
         saveApiButton.setOnClickListener {
             saveApiConfiguration()
         }
@@ -66,6 +77,11 @@ class SettingsActivity : Activity() {
         testApiButton.setOnClickListener {
             testApiConnection()
         }
+    }
+
+    private fun clearCache() {
+        apiHelper.clearAllCache()
+        Toast.makeText(this, getString(R.string.cache_cleared), Toast.LENGTH_SHORT).show()
     }
 
     private fun saveApiConfiguration() {

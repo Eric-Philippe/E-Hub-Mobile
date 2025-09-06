@@ -144,6 +144,13 @@ class EHubApiHelper(private val context: Context) {
     }
 
     /**
+     * Clear all the cache
+     */
+    fun clearAllCache() {
+        apiManager.clearCache(context)
+    }
+
+    /**
      * api/nonogram { "started": Date, "ended": Date }
      */
     fun submitNonogramAsync(
