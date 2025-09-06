@@ -8,6 +8,7 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import com.ericp.e_hub.R // Ajout de l'import pour R
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -35,6 +36,23 @@ class HexPatternView @JvmOverloads constructor(
     private val topColor = Color.parseColor("#6D071A")
     private val midColor = Color.parseColor("#444444")
     private val whiteColor = Color.WHITE
+
+    /**
+     * If true, colors are inverted (bottom to top).
+     */
+    var reverseColorDirection: Boolean = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    init {
+        attrs?.let {
+            val ta = context.obtainStyledAttributes(it, R.styleable.HexPatternView)
+            reverseColorDirection = ta.getBoolean(R.styleable.HexPatternView_reverseColorDirection, false)
+            ta.recycle()
+        }
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -87,26 +105,27 @@ class HexPatternView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val h = height.toFloat().coerceAtLeast(1f)
-        val topPhaseEnd = 0.35f      // 0% - 20% top color
-        val midPhaseEnd = 0.70f      // 20% - 60% dark grey
-        val fadeStart = midPhaseEnd  // start fading to white after mid phase
-        val fadeEnd = 1.0f           // fully white / invisible bottom
+        val topPhaseEnd = 0.35f
+        val midPhaseEnd = 0.70f
+        val fadeStart = midPhaseEnd
+        val fadeEnd = 1.0f
 
         for ((path, _, cy) in hexPaths) {
-            val frac = (cy / h).coerceIn(0f, 1f)
+            // Compute fraction, invert if needed
+            val fracRaw = (cy / h).coerceIn(0f, 1f)
+            val frac = if (reverseColorDirection) 1f - fracRaw else fracRaw
+
             val (color, alpha) = when {
                 frac <= topPhaseEnd -> {
                     topColor to 220
                 }
                 frac <= midPhaseEnd -> {
-                    // Dark grey zone
                     midColor to 170
                 }
                 frac >= fadeEnd -> {
                     whiteColor to 0
                 }
                 else -> {
-                    // Blend mid -> white and fade alpha
                     val t = ((frac - fadeStart) / (fadeEnd - fadeStart)).coerceIn(0f, 1f)
                     val blended = blend(midColor, whiteColor, t)
                     val a = ((1f - t) * 150f).toInt()

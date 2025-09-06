@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="HexPatternView">
+        <attr name="reverseColorDirection" format="boolean" />
+    </declare-styleable>
+</resources>
+
