@@ -3,7 +3,7 @@ package com.ericp.e_hub
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import com.ericp.e_hub.utils.EHubApiHelper
 import kotlinx.coroutines.CoroutineScope
@@ -22,34 +22,34 @@ class MainActivity : Activity() {
 
         apiHelper = EHubApiHelper(this)
 
-        val playNonogramButton = findViewById<Button>(R.id.playNonogramButton)
+        val playNonogramButton = findViewById<LinearLayout>(R.id.playNonogramButton)
         playNonogramButton.setOnClickListener {
             val intent = Intent(this, NonogramActivity::class.java)
             startActivity(intent)
         }
 
-        val nextCloudButton = findViewById<Button>(R.id.nextCloudButton)
+        val nextCloudButton = findViewById<LinearLayout>(R.id.nextCloudButton)
         nextCloudButton.setOnClickListener {
             val intent = Intent(this, NextCloudGymActivity::class.java)
             startActivity(intent)
         }
 
-        val nextCloudSettingsButton = findViewById<Button>(R.id.nextCloudSettingsButton)
-        nextCloudSettingsButton.setOnClickListener {
-            val intent = Intent(this, NextCloudGymSettingsActivity::class.java)
-            startActivity(intent)
-        }
-
-        val settingsButton = findViewById<Button?>(R.id.settingsButton)
-        settingsButton?.setOnClickListener {
+        val settingsButton = findViewById<LinearLayout>(R.id.settingsButton)
+        settingsButton.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
 
-        val toBuyButton = findViewById<Button>(R.id.toBuyButton)
+        val toBuyButton = findViewById<LinearLayout>(R.id.toBuyButton)
         toBuyButton.setOnClickListener {
             val intent = Intent(this, ToBuyActivity::class.java)
             startActivity(intent)
+        }
+
+        val todoButton = findViewById<LinearLayout>(R.id.todoButton)
+        todoButton.setOnClickListener {
+            // ToDo List button - currently links to nowhere as requested
+            Toast.makeText(this, "ToDo List feature coming soon!", Toast.LENGTH_SHORT).show()
         }
 
         checkApiAndFetchData()
