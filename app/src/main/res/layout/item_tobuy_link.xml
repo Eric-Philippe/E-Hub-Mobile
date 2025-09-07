@@ -10,93 +10,97 @@
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:padding="12dp"
-        android:gravity="center_vertical">
+        android:background="#FFFFFF"
+        android:minHeight="120dp">
 
         <!-- Image Container -->
-        <FrameLayout
+        <androidx.cardview.widget.CardView
+            android:id="@+id/imageContainer"
             android:layout_width="80dp"
             android:layout_height="60dp"
-            android:layout_marginEnd="12dp">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageView
-                android:id="@+id/illustrationImageView"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:background="#F0F0F0"
-                android:visibility="gone" />
+                android:layout_height="match_parent">
 
-            <LinearLayout
-                android:id="@+id/noImagePlaceholder"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="#F5F5F5"
-                android:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🖼️"
-                    android:textSize="24sp" />
-
-            </LinearLayout>
-
-        </FrameLayout>
-
-        <!-- Content -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/urlTextView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="https://example.com"
-                    android:textSize="14sp"
-                    android:textColor="#333333"
-                    android:maxLines="2"
-                    android:ellipsize="end" />
-
-                <View
-                    android:id="@+id/favouriteIndicator"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginStart="8dp"
-                    android:background="#FFD700"
+                <ImageView
+                    android:id="@+id/illustrationImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:background="#F0F0F0"
+                    android:padding="4dp"
                     android:visibility="gone" />
 
-            </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/noImagePlaceholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="#F5F5F5"
+                    android:visibility="visible">
 
-            <TextView
-                android:id="@+id/priceTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="25€"
-                android:textSize="12sp"
-                android:textColor="#2196F3"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🖼️"
+                        android:textSize="24sp" />
 
-        </LinearLayout>
+                </LinearLayout>
 
-    </LinearLayout>
+            </FrameLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Favourite Indicator (rond en haut à droite) -->
+        <View
+            android:id="@+id/favouriteIndicator"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/circle_favourite"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Prix (en dessous du favourite indicator) -->
+        <TextView
+            android:id="@+id/priceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="25€"
+            android:textSize="16sp"
+            android:textColor="#2196F3"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/favouriteIndicator"
+            android:layout_marginTop="8dp" />
+
+        <!-- Link Button (en bas à droite, moins haut mais plus large) -->
+        <Button
+            android:id="@+id/linkButton"
+            android:layout_width="100dp"
+            android:layout_height="32dp"
+            android:text="Voir le lien"
+            android:textSize="11sp"
+            android:textAllCaps="false"
+            android:background="@drawable/btn_outline"
+            android:textColor="@color/gray_400"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

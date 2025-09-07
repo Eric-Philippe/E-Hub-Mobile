@@ -5,6 +5,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +19,7 @@ class ToBuyLinkAdapter(
 
     class LinkViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val illustrationImageView: ImageView = itemView.findViewById(R.id.illustrationImageView)
-        val urlTextView: TextView = itemView.findViewById(R.id.urlTextView)
+        val linkButton: Button = itemView.findViewById(R.id.linkButton)
         val priceTextView: TextView = itemView.findViewById(R.id.priceTextView)
         val favouriteIndicator: View = itemView.findViewById(R.id.favouriteIndicator)
         val noImagePlaceholder: View = itemView.findViewById(R.id.noImagePlaceholder)
@@ -33,8 +34,11 @@ class ToBuyLinkAdapter(
     override fun onBindViewHolder(holder: LinkViewHolder, position: Int) {
         val link = links[position]
 
-        // Set URL
-        holder.urlTextView.text = link.url
+        // Set button click listener to open URL
+        holder.linkButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
+            holder.itemView.context.startActivity(intent)
+        }
 
         // Set price if available
         if (link.price != null) {
@@ -59,12 +63,6 @@ class ToBuyLinkAdapter(
         } else {
             holder.illustrationImageView.visibility = View.GONE
             holder.noImagePlaceholder.visibility = View.VISIBLE
-        }
-
-        // Click listener to open URL
-        holder.itemView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
-            holder.itemView.context.startActivity(intent)
         }
     }
 
