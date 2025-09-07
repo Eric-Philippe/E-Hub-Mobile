@@ -1,6 +1,7 @@
 package com.ericp.e_hub
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -62,6 +63,11 @@ class ToBuyActivity : FragmentActivity() {
         updateEmptyState()
     }
 
+    override fun onResume() {
+        super.onResume()
+        fetchToBuyItems()
+    }
+
     private fun initializeComponents() {
         backButton = findViewById(R.id.backButton)
         titleTextView = findViewById(R.id.titleTextView)
@@ -79,11 +85,8 @@ class ToBuyActivity : FragmentActivity() {
         categoryAdapter = CategoryAccordionAdapter(
             filteredSections,
             onItemClick = { item ->
-                // Find the item in the original list to get its position
-                val position = allToBuyItems.indexOfFirst { it.id == item.id }
-                if (position >= 0) {
-                    editItem(position, item)
-                }
+                // Navigate to details activity
+                openToBuyDetails(item)
             },
             onItemLongClick = { item ->
                 // Find the item in the original list to get its position
@@ -95,6 +98,18 @@ class ToBuyActivity : FragmentActivity() {
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = categoryAdapter
+    }
+
+    private fun openToBuyDetails(item: ToBuyDto) {
+        val intent = Intent(this, ToBuyDetailsActivity::class.java)
+        intent.putExtra("TOBUY_ID", item.id.toString())
+        intent.putExtra("TOBUY_TITLE", item.title)
+        intent.putExtra("TOBUY_DESCRIPTION", item.description)
+        intent.putExtra("TOBUY_CRITERIA", item.criteria)
+        intent.putExtra("TOBUY_BOUGHT", item.bought)
+        intent.putExtra("TOBUY_ESTIMATED_PRICE", item.estimatedPrice)
+        intent.putExtra("TOBUY_INTEREST", item.interest)
+        startActivity(intent)
     }
 
     private fun showItemContextMenu(position: Int, item: ToBuyDto) {

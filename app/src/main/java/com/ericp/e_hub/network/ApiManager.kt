@@ -97,8 +97,14 @@ class ApiManager private constructor() {
     }
 
     private fun generateCacheKey(endpoint: String, method: String, params: Map<String, Any>? = null): String {
-        val paramsStr = params?.entries?.joinToString("&") { "${it.key}=${it.value}" } ?: ""
-        return "${method}_${endpoint}_$paramsStr".hashCode().toString()
+        val baseKey = "${method}_${endpoint}"
+        if (params == null || params.isEmpty()) {
+            return baseKey
+        }
+        // Sort params for consistency
+        val sortedParams = params.toSortedMap()
+        val paramsStr = sortedParams.entries.joinToString("&") { "${it.key}=${it.value}" }
+        return "$baseKey?$paramsStr"
     }
 
     private fun getAuthHeader(context: Context): String? {
@@ -310,15 +316,7 @@ class ApiManager private constructor() {
 
     fun clearEndpointCache(context: Context, endpoint: String) {
         val apiCache = ApiCache(context.applicationContext)
-        val cacheKeyGet = generateCacheKey(endpoint, "GET")
-        val cacheKeyPost = generateCacheKey(endpoint, "POST")
-        val cacheKeyPut = generateCacheKey(endpoint, "PUT")
-        val cacheKeyDelete = generateCacheKey(endpoint, "DELETE")
-
-        apiCache.remove(cacheKeyGet)
-        apiCache.remove(cacheKeyPost)
-        apiCache.remove(cacheKeyPut)
-        apiCache.remove(cacheKeyDelete)
+        apiCache.removeByEndpointPrefix(endpoint)
     }
 
     sealed class ApiResult {

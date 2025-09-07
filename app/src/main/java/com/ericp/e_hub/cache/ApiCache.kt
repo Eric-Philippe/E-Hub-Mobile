@@ -101,4 +101,20 @@ class ApiCache(context: Context) {
             e.printStackTrace()
         }
     }
+
+    /**
+     * Remove all cache entries whose endpoint starts with the given prefix (e.g. "api/tobuy" or "api/tobuy/").
+     */
+    fun removeByEndpointPrefix(endpointPrefix: String) {
+        val index = getCacheIndex()
+        val keysToRemove = index.keys.filter { key ->
+            // Extract the endpoint part from the cache key
+            val parts = key.split("_", limit = 3)
+            if (parts.size < 2) return@filter false
+            val endpoint = parts[1]
+            endpoint == endpointPrefix || endpoint.startsWith("$endpointPrefix/")
+        }
+        keysToRemove.forEach { index.remove(it) }
+        saveCacheIndex(index)
+    }
 }
