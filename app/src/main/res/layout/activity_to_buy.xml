@@ -199,6 +199,25 @@
                 android:popupBackground="@drawable/spinner_popup_background"/>
         </LinearLayout>
 
+        <!-- Manage Categories Button -->
+        <Button
+            android:id="@+id/manageCategoriesButton"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:text="Manage Categories"
+            android:textSize="12sp"
+            android:textColor="#2196F3"
+            android:background="@drawable/btn_outline"
+            android:paddingHorizontal="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:drawableStart="@android:drawable/ic_menu_manage"
+            android:drawablePadding="8dp"
+            android:drawableTint="#2196F3"
+            android:scaleX="0.9"
+            android:scaleY="0.9" />
+
     </LinearLayout>
 
     <!-- Main Content Area -->

@@ -55,6 +55,10 @@
             android:name=".ToBuyDetailsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ToBuyCategoriesActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

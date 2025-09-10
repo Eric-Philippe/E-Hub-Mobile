@@ -1,13 +1,16 @@
 package com.ericp.e_hub
 
+import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +43,7 @@ class ToBuyActivity : FragmentActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var addItemFab: FloatingActionButton
     private lateinit var emptyStateLayout: View
+    private lateinit var manageCategoriesButton: Button
 
     // Data / helpers
     private lateinit var categoryAdapter: CategoryAccordionAdapter
@@ -88,6 +92,7 @@ class ToBuyActivity : FragmentActivity() {
         recyclerView = findViewById(R.id.toBuyRecyclerView)
         addItemFab = findViewById(R.id.addItemFab)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
+        manageCategoriesButton = findViewById(R.id.manageCategoriesButton)
     }
 
     private fun setupRecyclerView() {
@@ -245,6 +250,11 @@ class ToBuyActivity : FragmentActivity() {
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+
+        manageCategoriesButton.setOnClickListener {
+            val intent = Intent(this, ToBuyCategoriesActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setFilterState(notBought: Boolean) {
@@ -381,6 +391,13 @@ class ToBuyActivity : FragmentActivity() {
 
         updateTotalPrice(filteredItems)
         updateEmptyState()
+        updateManageCategoriesButtonVisibility()
+    }
+
+    private fun updateManageCategoriesButtonVisibility() {
+        // Show the manage categories button if there are any categories with items
+        val hasCategories = allToBuyItems.any { it.categories.isNotEmpty() }
+        manageCategoriesButton.visibility = if (hasCategories) View.VISIBLE else View.GONE
     }
 
     private fun updateTotalPrice(items: List<ToBuyDto>) {
