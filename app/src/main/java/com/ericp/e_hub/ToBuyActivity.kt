@@ -2,50 +2,59 @@ package com.ericp.e_hub
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.view.ViewGroup
+import android.widget.*
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ericp.e_hub.adapters.tobuy.CategoryAccordionAdapter
 import com.ericp.e_hub.adapters.tobuy.CategorySection
-import com.ericp.e_hub.dto.ToBuyDto
 import com.ericp.e_hub.dto.ToBuyCategoryDto
+import com.ericp.e_hub.dto.ToBuyDto
 import com.ericp.e_hub.managers.AddToBuyModalManager
 import com.ericp.e_hub.utils.EHubApiHelper
 import com.ericp.e_hub.utils.Endpoints
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 class ToBuyActivity : FragmentActivity() {
+    // UI
     private lateinit var backButton: Button
     private lateinit var titleTextView: TextView
     private lateinit var totalPriceText: TextView
     private lateinit var searchEditText: EditText
     private lateinit var filterNotBoughtButton: Button
     private lateinit var filterAllButton: Button
-    private lateinit var sortButton: Button
+    private lateinit var sortPriceButton: Button
+    private lateinit var sortDateButton: Button
+    private lateinit var yearFilterSpinner: Spinner
     private lateinit var recyclerView: RecyclerView
     private lateinit var addItemFab: FloatingActionButton
     private lateinit var emptyStateLayout: View
 
+    // Data / helpers
     private lateinit var categoryAdapter: CategoryAccordionAdapter
     private lateinit var modalManager: AddToBuyModalManager
     private lateinit var apiHelper: EHubApiHelper
     private val allToBuyItems = mutableListOf<ToBuyDto>()
     private val filteredSections = mutableListOf<CategorySection>()
 
-    // Filter states
+    // Filters / sorting
     private var showOnlyNotBought = true
-    private var sortByPrice = false
     private var searchQuery = ""
+    private var selectedYear: Int? = null
+
+    private enum class SortMode { NONE, PRICE_DESC, PRICE_ASC, DATE_NEWEST, DATE_OLDEST }
+    private var sortMode: SortMode = SortMode.NONE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,10 +65,8 @@ class ToBuyActivity : FragmentActivity() {
         setupModalManager()
         setupListeners()
 
-        // Initialize API helper and fetch existing items
         apiHelper = EHubApiHelper(this)
         fetchToBuyItems()
-
         updateEmptyState()
     }
 
@@ -75,7 +82,9 @@ class ToBuyActivity : FragmentActivity() {
         searchEditText = findViewById(R.id.searchEditText)
         filterNotBoughtButton = findViewById(R.id.filterNotBoughtButton)
         filterAllButton = findViewById(R.id.filterAllButton)
-        sortButton = findViewById(R.id.sortButton)
+        sortPriceButton = findViewById(R.id.sortPriceButton)
+        sortDateButton = findViewById(R.id.sortDateButton)
+        yearFilterSpinner = findViewById(R.id.yearFilterSpinner)
         recyclerView = findViewById(R.id.toBuyRecyclerView)
         addItemFab = findViewById(R.id.addItemFab)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
@@ -84,16 +93,10 @@ class ToBuyActivity : FragmentActivity() {
     private fun setupRecyclerView() {
         categoryAdapter = CategoryAccordionAdapter(
             filteredSections,
-            onItemClick = { item ->
-                // Navigate to details activity
-                openToBuyDetails(item)
-            },
+            onItemClick = { item -> openToBuyDetails(item) },
             onItemLongClick = { item ->
-                // Find the item in the original list to get its position
                 val position = allToBuyItems.indexOfFirst { it.id == item.id }
-                if (position >= 0) {
-                    showItemContextMenu(position, item)
-                }
+                if (position >= 0) showItemContextMenu(position, item)
             }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -114,7 +117,6 @@ class ToBuyActivity : FragmentActivity() {
 
     private fun showItemContextMenu(position: Int, item: ToBuyDto) {
         val options = arrayOf("Edit", "Delete")
-
         AlertDialog.Builder(this)
             .setTitle("Choose Action")
             .setItems(options) { _, which ->
@@ -122,23 +124,18 @@ class ToBuyActivity : FragmentActivity() {
                     0 -> editItem(position, item)
                     1 -> confirmDeleteItem(position, item)
                 }
-            }
-            .show()
+            }.show()
     }
 
     private fun editItem(position: Int, item: ToBuyDto) {
-        modalManager.showModal(item, { updatedItem ->
-            updateToBuyItem(position, updatedItem)
-        })
+        modalManager.showModal(item) { updatedItem -> updateToBuyItem(position, updatedItem) }
     }
 
     private fun confirmDeleteItem(position: Int, item: ToBuyDto) {
         AlertDialog.Builder(this)
             .setTitle("Delete Item")
             .setMessage("Are you sure you want to delete \"${item.title}\"?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteItem(position, item)
-            }
+            .setPositiveButton("Delete") { _, _ -> deleteItem(position, item) }
             .setNegativeButton("Cancel", null)
             .show()
     }
@@ -151,7 +148,6 @@ class ToBuyActivity : FragmentActivity() {
                     runOnUiThread {
                         allToBuyItems.removeAt(position)
                         updateCategorySections()
-                        // Clear ToBuy cache after successful deletion
                         apiHelper.clearToBuyCache()
                         Toast.makeText(this, "Item deleted successfully", Toast.LENGTH_SHORT).show()
                     }
@@ -163,7 +159,6 @@ class ToBuyActivity : FragmentActivity() {
                 }
             )
         } else {
-            // For items without ID (local only), just remove from list
             allToBuyItems.removeAt(position)
             updateCategorySections()
             Toast.makeText(this, "Item deleted", Toast.LENGTH_SHORT).show()
@@ -182,7 +177,6 @@ class ToBuyActivity : FragmentActivity() {
                             val updated: ToBuyDto = gson.fromJson(response, ToBuyDto::class.java)
                             allToBuyItems[position] = updated
                             updateCategorySections()
-                            // Clear ToBuy cache after successful update
                             apiHelper.clearToBuyCache()
                             Toast.makeText(this, "Item updated successfully", Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) {
@@ -197,7 +191,6 @@ class ToBuyActivity : FragmentActivity() {
                 }
             )
         } else {
-            // For items without ID (local only), just update in list
             allToBuyItems[position] = updatedItem
             updateCategorySections()
             Toast.makeText(this, "Item updated", Toast.LENGTH_SHORT).show()
@@ -205,118 +198,187 @@ class ToBuyActivity : FragmentActivity() {
     }
 
     private fun setupModalManager() {
-        modalManager = AddToBuyModalManager(this) { newItem ->
-            addToBuyItem(newItem)
-        }
+        modalManager = AddToBuyModalManager(this) { newItem -> addToBuyItem(newItem) }
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener {
-            finish()
-        }
+        backButton.setOnClickListener { finish() }
+        addItemFab.setOnClickListener { modalManager.showModal() }
 
-        addItemFab.setOnClickListener {
-            modalManager.showModal()
-        }
-
-        // Search functionality
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                searchQuery = s?.toString()?.trim() ?: ""
+                searchQuery = s?.toString()?.trim().orEmpty()
                 updateCategorySections()
             }
         })
 
-        // Filter buttons
-        filterNotBoughtButton.setOnClickListener {
-            setFilterState(notBought = true)
-        }
+        filterNotBoughtButton.setOnClickListener { setFilterState(notBought = true) }
+        filterAllButton.setOnClickListener { setFilterState(notBought = false) }
 
-        filterAllButton.setOnClickListener {
-            setFilterState(notBought = false)
-        }
-
-        // Sort button
-        sortButton.setOnClickListener {
-            sortByPrice = !sortByPrice
-            sortButton.text = if (sortByPrice) "Sort: Price ↓" else "Sort by Price"
+        sortPriceButton.setOnClickListener {
+            sortMode = when (sortMode) {
+                SortMode.PRICE_DESC -> SortMode.PRICE_ASC
+                SortMode.PRICE_ASC -> SortMode.NONE
+                else -> SortMode.PRICE_DESC
+            }
+            updateSortButtonsUI()
             updateCategorySections()
+        }
+
+        sortDateButton.setOnClickListener {
+            sortMode = when (sortMode) {
+                SortMode.DATE_NEWEST -> SortMode.DATE_OLDEST
+                SortMode.DATE_OLDEST -> SortMode.NONE
+                else -> SortMode.DATE_NEWEST
+            }
+            updateSortButtonsUI()
+            updateCategorySections()
+        }
+
+        yearFilterSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val value = parent.getItemAtPosition(position) as String
+                selectedYear = if (value == "All") null else value.toIntOrNull()
+                updateCategorySections()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
     private fun setFilterState(notBought: Boolean) {
         showOnlyNotBought = notBought
-
-        // Update button appearance with proper selected states
-        if (notBought) {
-            filterNotBoughtButton.isSelected = true
-            filterNotBoughtButton.setTextColor(getColor(android.R.color.white))
-            filterAllButton.isSelected = false
-            filterAllButton.setTextColor(getColor(android.R.color.darker_gray))
-        } else {
-            filterAllButton.isSelected = true
-            filterAllButton.setTextColor(getColor(android.R.color.white))
-            filterNotBoughtButton.isSelected = false
-            filterNotBoughtButton.setTextColor(getColor(android.R.color.darker_gray))
-        }
-
+        filterNotBoughtButton.setTextColor(if (notBought) getColor(android.R.color.white) else Color.parseColor("#2196F3"))
+        filterAllButton.setTextColor(if (notBought) Color.parseColor("#666666") else getColor(android.R.color.white))
+        filterNotBoughtButton.isSelected = notBought
+        filterAllButton.isSelected = !notBought
         updateCategorySections()
     }
 
+    private fun extractYear(created: String?): Int? {
+        if (created.isNullOrBlank()) return null
+        return created.take(4).toIntOrNull()
+    }
+
+    private fun parseTimestamp(created: String?): Long {
+        if (created.isNullOrBlank()) return 0L
+        return try {
+            Instant.parse(created).toEpochMilli()
+        } catch (_: Exception) {
+            try {
+                LocalDate.parse(created).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            } catch (_: Exception) {
+                created.filter { it.isDigit() }.toLongOrNull() ?: 0L
+            }
+        }
+    }
+
+    private fun updateYearFilterOptions() {
+        val years = allToBuyItems
+            .mapNotNull { extractYear(it.created) }
+            .distinct()
+            .sortedDescending()
+            .map { it.toString() }
+
+        val entries = listOf("All") + years
+
+        val adapter = object : ArrayAdapter<String>(this, R.layout.spinner_year_item, entries) {
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = convertView ?: layoutInflater.inflate(R.layout.spinner_year_dropdown_item, parent, false)
+                val tv = view.findViewById<TextView>(R.id.spinnerYearText)
+                tv.text = getItem(position)
+                return view
+            }
+        }
+        yearFilterSpinner.adapter = adapter
+
+        selectedYear?.let { yr ->
+            val idx = entries.indexOf(yr.toString())
+            if (idx >= 0) yearFilterSpinner.setSelection(idx)
+        }
+    }
+
+    private fun updateSortButtonsUI() {
+        sortPriceButton.text = when (sortMode) {
+            SortMode.PRICE_DESC -> "Price ↓"
+            SortMode.PRICE_ASC -> "Price ↑"
+            else -> "Price"
+        }
+        sortDateButton.text = when (sortMode) {
+            SortMode.DATE_NEWEST -> "Date ↓"
+            SortMode.DATE_OLDEST -> "Date ↑"
+            else -> "Date"
+        }
+        val activeColor = Color.parseColor("#2196F3")          // changed from white
+        val inactiveColor = Color.parseColor("#666666")
+        fun setBtn(btn: Button, active: Boolean) {
+            btn.isSelected = active
+            btn.setTextColor(if (active) activeColor else inactiveColor)
+        }
+        setBtn(sortPriceButton, sortMode == SortMode.PRICE_DESC || sortMode == SortMode.PRICE_ASC)
+        setBtn(sortDateButton, sortMode == SortMode.DATE_NEWEST || sortMode == SortMode.DATE_OLDEST)
+    }
+
     private fun updateCategorySections() {
-        // Filter items based on current criteria
         val filteredItems = allToBuyItems.filter { item ->
-            val matchesFilter = if (showOnlyNotBought) item.bought == null else true
-            val matchesSearch = if (searchQuery.isEmpty()) true else
-                item.title.contains(searchQuery, ignoreCase = true)
-
-            matchesFilter && matchesSearch
+            val matchesNotBought = if (showOnlyNotBought) item.bought == null else true
+            val matchesSearch = searchQuery.isEmpty() || item.title.contains(searchQuery, true)
+            val matchesYear = selectedYear?.let { extractYear(item.created) == it } ?: true
+            matchesNotBought && matchesSearch && matchesYear
         }
 
-        // Group items by categories
         val categoryMap = mutableMapOf<String, MutableList<ToBuyDto>>()
-
         for (item in filteredItems) {
-            if (item.categories.isEmpty()) {
-                // Handle items without categories
-                val uncategorized = categoryMap.getOrPut("Uncategorized") { mutableListOf() }
-                uncategorized.add(item)
-            } else {
-                // Add item to each of its categories
-                for (category in item.categories) {
-                    val categoryName = category.name ?: "Uncategorized"
-                    val itemsInCategory = categoryMap.getOrPut(categoryName) { mutableListOf() }
-                    itemsInCategory.add(item)
-                }
+            val categories = item.categories.takeIf { it.isNotEmpty() } ?: listOf(ToBuyCategoryDto(name = "Uncategorized"))
+            for (cat in categories) {
+                val name = cat.name ?: "Uncategorized"
+                categoryMap.getOrPut(name) { mutableListOf() }.add(item)
             }
         }
 
-        // Create category sections with collapsed state to prevent crashes
-        val sections = categoryMap.map { (categoryName, items) ->
-            val sortedItems = if (sortByPrice) {
-                items.sortedByDescending { it.estimatedPrice ?: 0 }
-            } else {
-                items.sortedBy { it.title }
+        data class CategoryMeta(
+            val category: ToBuyCategoryDto,
+            val items: List<ToBuyDto>,
+            val totalPrice: Int,
+            val mostRecentTs: Long,
+            val oldestTs: Long
+        )
+
+        val metas = categoryMap.map { (name, items) ->
+            val totalPrice = items.sumOf { it.estimatedPrice ?: 0 }
+            val timestamps = items.map { parseTimestamp(it.created) }.ifEmpty { listOf(0L) }
+            val mostRecent = timestamps.maxOrNull() ?: 0L
+            val oldest = timestamps.minOrNull() ?: 0L
+
+            val categoryDto = allToBuyItems.flatMap { it.categories }.find { it.name == name }
+                ?: ToBuyCategoryDto(name = name)
+
+            val sortedItems = when (sortMode) {
+                SortMode.PRICE_DESC -> items.sortedByDescending { it.estimatedPrice ?: 0 }
+                SortMode.PRICE_ASC -> items.sortedBy { it.estimatedPrice ?: 0 }
+                SortMode.DATE_NEWEST -> items.sortedByDescending { parseTimestamp(it.created) }
+                SortMode.DATE_OLDEST -> items.sortedBy { parseTimestamp(it.created) }
+                SortMode.NONE -> items.sortedBy { it.title.lowercase() }
             }
 
-            // Find the category DTO for this category name
-            val categoryDto = allToBuyItems
-                .flatMap { it.categories }
-                .find { it.name == categoryName }
-                ?: ToBuyCategoryDto(name = categoryName)
+            CategoryMeta(categoryDto, sortedItems, totalPrice, mostRecent, oldest)
+        }
 
-            // Always start with collapsed state when filtering to prevent crashes
-            CategorySection(categoryDto, sortedItems, false)
-        }.sortedBy { it.category.name }
+        val sortedMetas = when (sortMode) {
+            SortMode.PRICE_DESC -> metas.sortedByDescending { it.totalPrice }
+            SortMode.PRICE_ASC -> metas.sortedBy { it.totalPrice }
+            SortMode.DATE_NEWEST -> metas.sortedByDescending { it.mostRecentTs }
+            SortMode.DATE_OLDEST -> metas.sortedBy { it.oldestTs }
+            SortMode.NONE -> metas.sortedBy { (it.category.name ?: "").lowercase() }
+        }
 
-        // Update the adapter
+        val sections = sortedMetas.map { CategorySection(it.category, it.items, false) }
+
         filteredSections.clear()
         filteredSections.addAll(sections)
         categoryAdapter.updateSections(sections)
 
-        // Update total price
         updateTotalPrice(filteredItems)
         updateEmptyState()
     }
@@ -328,6 +390,7 @@ class ToBuyActivity : FragmentActivity() {
 
     private fun addToBuyItem(item: ToBuyDto) {
         allToBuyItems.add(item)
+        updateYearFilterOptions()
         updateCategorySections()
     }
 
@@ -349,21 +412,22 @@ class ToBuyActivity : FragmentActivity() {
                     val gson = Gson()
                     val toBuyListType = object : TypeToken<List<ToBuyDto>>() {}.type
                     val fetchedItems: List<ToBuyDto> = gson.fromJson(response, toBuyListType)
-
-                    // Clear existing items and add fetched items
                     allToBuyItems.clear()
                     allToBuyItems.addAll(fetchedItems)
-
-                    // Initialize with default filter (not bought items)
+                    updateYearFilterOptions()
                     setFilterState(notBought = true)
-
+                    updateSortButtonsUI()
                 } catch (e: Exception) {
-                    Toast.makeText(this@ToBuyActivity, "Failed to parse ToBuy items: ${e.message}", Toast.LENGTH_LONG).show()
+                    runOnUiThread {
+                        Toast.makeText(this, "Failed to parse ToBuy items: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
                 }
             },
             onError = { error ->
-                Toast.makeText(this@ToBuyActivity, "Failed to load ToBuy items: $error", Toast.LENGTH_LONG).show()
-                updateEmptyState()
+                runOnUiThread {
+                    Toast.makeText(this, "Failed to load ToBuy items: $error", Toast.LENGTH_LONG).show()
+                    updateEmptyState()
+                }
             }
         )
     }

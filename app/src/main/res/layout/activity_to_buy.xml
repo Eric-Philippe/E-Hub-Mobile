@@ -132,7 +132,7 @@
 
         </LinearLayout>
 
-        <!-- Sort Row -->
+        <!-- Sort Row (updated) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -148,16 +148,55 @@
                 android:layout_marginEnd="8dp" />
 
             <Button
-                android:id="@+id/sortButton"
+                android:id="@+id/sortPriceButton"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="@string/sort_by_price"
+                android:text="Price"
+                android:textSize="12sp"
+                android:background="@drawable/btn_outline"
+                android:textColor="#666666"
+                android:paddingHorizontal="12dp"
+                android:minWidth="0dp"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/sortDateButton"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Date"
                 android:textSize="12sp"
                 android:background="@drawable/btn_outline"
                 android:textColor="#666666"
                 android:paddingHorizontal="12dp"
                 android:minWidth="0dp" />
+        </LinearLayout>
 
+        <!-- Year Filter Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Year:"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginEnd="8dp"/>
+
+            <Spinner
+                android:id="@+id/yearFilterSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:spinnerMode="dropdown"
+                android:paddingHorizontal="16dp"
+                android:scaleX="0.85"
+                android:scaleY="0.85"
+                android:background="@drawable/btn_outline"
+                android:popupBackground="@drawable/spinner_popup_background"/>
         </LinearLayout>
 
     </LinearLayout>
