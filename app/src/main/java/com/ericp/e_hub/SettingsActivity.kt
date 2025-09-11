@@ -3,7 +3,6 @@ package com.ericp.e_hub
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -13,7 +12,7 @@ import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.network.ApiManager
 import com.ericp.e_hub.utils.EHubApiHelper
 import com.ericp.e_hub.utils.SettingsExporter
-import com.ericp.e_hub.utils.SettingsImporter
+import com.ericp.e_hub.utils.SettingsImporter import com.google.gson.Gson
 import kotlinx.coroutines.*
 
 class SettingsActivity : Activity() {
@@ -127,7 +126,7 @@ class SettingsActivity : Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_OK || data == null) return
+        if (resultCode != RESULT_OK || data == null) return
 
         when (requestCode) {
             REQUEST_EXPORT_SETTINGS -> {
@@ -139,7 +138,7 @@ class SettingsActivity : Activity() {
                             outputStream.write(xmlString.toByteArray())
                         }
                         Toast.makeText(this, "Settings exported successfully.", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         Toast.makeText(this, "Failed to export settings.", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -212,8 +211,18 @@ class SettingsActivity : Activity() {
 
                 when (result) {
                     is ApiManager.ApiResult.Success -> {
-                        apiStatusText.text = getString(R.string.api_status_connected)
-                        Toast.makeText(this@SettingsActivity, "API connection successful", Toast.LENGTH_SHORT).show()
+                        val gson = Gson()
+                        val healthJson = gson.toJson(result.data)
+                        // If we have a connected to false
+                        if (healthJson.contains("connected\\\":false")) {
+                            apiStatusText.text = getString(R.string.api_status_unauthorized)
+                            apiConfig.setAuthorized(false)
+                        } else {
+                            apiStatusText.text = getString(R.string.api_status_connected)
+                            apiConfig.setAuthorized(true)
+                        }
+
+                        Toast.makeText(this@SettingsActivity, apiStatusText.text, Toast.LENGTH_LONG).show()
                     }
                     is ApiManager.ApiResult.Error -> {
                         apiStatusText.text = "Error: ${result.message}"
@@ -237,7 +246,10 @@ class SettingsActivity : Activity() {
 
     private fun updateApiStatus() {
         if (apiConfig.isApiKeyConfigured()) {
-            apiStatusText.text = getString(R.string.api_status_connected)
+            if (apiConfig.isAuthorized())
+                apiStatusText.text = getString(R.string.api_status_connected)
+            else
+                apiStatusText.text = getString(R.string.api_status_unauthorized)
         } else {
             apiStatusText.text = getString(R.string.api_status_not_configured)
         }

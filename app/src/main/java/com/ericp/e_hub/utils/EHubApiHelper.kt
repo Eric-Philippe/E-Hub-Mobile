@@ -25,7 +25,8 @@ class EHubApiHelper(private val context: Context) {
     fun fetchDataAsync(
         endpoint: String,
         onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        allowCache: (ApiManager.UseCache) = ApiManager.UseCache.PARTIAL
     ) {
         if (!isApiConfigured()) {
             onError("API not configured. Please set your API key in settings.")
@@ -33,7 +34,7 @@ class EHubApiHelper(private val context: Context) {
         }
 
         CoroutineScope(Dispatchers.Main).launch {
-            when (val result = apiManager.get(context, endpoint)) {
+            when (val result = apiManager.get(context, endpoint, allowCache)) {
                 is ApiManager.ApiResult.Success -> {
                     onSuccess(result.data)
                 }

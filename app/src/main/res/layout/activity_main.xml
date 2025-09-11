@@ -55,7 +55,7 @@
 
     <!-- Decorative hex pattern divider reduced height -->
     <com.ericp.e_hub.ui.HexPatternView
-        android:id="@+id/hexPatternView"
+        android:id="@+id/hexPatternViewTop"
         android:layout_width="match_parent"
         android:layout_height="@dimen/hex_pattern_height"
     />
@@ -65,7 +65,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="32dp"
+        android:padding="12dp"
         android:gravity="center">
 
         <!-- Button Grid -->
@@ -244,7 +244,7 @@
     </LinearLayout>
 
     <com.ericp.e_hub.ui.HexPatternView
-            android:id="@+id/hexPatternView"
+            android:id="@+id/hexPatternViewBottom"
             android:layout_width="match_parent"
             android:layout_height="@dimen/hex_pattern_height"
             app:reverseColorDirection="true"

@@ -40,6 +40,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.material)
 
     // API et réseau
@@ -48,6 +49,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.gson)
+
+    // Image loading
+    implementation("com.squareup.picasso:picasso:2.8")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

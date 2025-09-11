@@ -97,8 +97,14 @@ class ApiManager private constructor() {
     }
 
     private fun generateCacheKey(endpoint: String, method: String, params: Map<String, Any>? = null): String {
-        val paramsStr = params?.entries?.joinToString("&") { "${it.key}=${it.value}" } ?: ""
-        return "${method}_${endpoint}_$paramsStr".hashCode().toString()
+        val baseKey = "${method}_${endpoint}"
+        if (params == null || params.isEmpty()) {
+            return baseKey
+        }
+        // Sort params for consistency
+        val sortedParams = params.toSortedMap()
+        val paramsStr = sortedParams.entries.joinToString("&") { "${it.key}=${it.value}" }
+        return "$baseKey?$paramsStr"
     }
 
     private fun getAuthHeader(context: Context): String? {
@@ -110,18 +116,18 @@ class ApiManager private constructor() {
     suspend fun get(
         context: Context,
         endpoint: String,
-        useCache: Boolean = true,
+        useCache: UseCache = UseCache.PARTIAL,
         cacheTtlHours: Long? = null
     ): ApiResult {
         val apiCache = ApiCache(context.applicationContext)
         val apiConfig = ApiConfig(context.applicationContext)
         val cacheKey = generateCacheKey(endpoint, "GET")
 
-        // Return cached if available and valid
-        if (useCache) {
+        // Directly return cached if available and valid
+        if (useCache == UseCache.YES) {
             apiCache.get(cacheKey)?.let { cachedData ->
                 try {
-                    return ApiResult.Success(cachedData)
+                    return ApiResult.Success(cachedData, cached = true)
                 } catch (_: JsonSyntaxException) {
                     apiCache.remove(cacheKey)
                 }
@@ -130,6 +136,11 @@ class ApiManager private constructor() {
 
         // If no network, return from cache even if expired or error
         if (!isNetworkAvailable(context)) {
+            if (useCache == UseCache.PARTIAL && apiCache.contains(cacheKey)) {
+                apiCache.get(cacheKey)?.let { cachedData ->
+                    return ApiResult.Success(cachedData, cached = true)
+                }
+            }
             return ApiResult.Error("No network connection", cached = apiCache.contains(cacheKey))
         }
 
@@ -144,9 +155,8 @@ class ApiManager private constructor() {
                 val responseBody = response.body()?.string() ?: ""
 
                 // Cache if enabled
-                if (useCache) {
+                if (useCache != UseCache.NO)
                     apiCache.put(cacheKey, responseBody, cacheTtlHours)
-                }
 
                 ApiResult.Success(responseBody)
             } else {
@@ -265,8 +275,7 @@ class ApiManager private constructor() {
     }
 
     suspend fun testConnection(context: Context): ApiResult {
-        // TODO: Replace with a proper endpoint to test connectivity
-        return get(context, Endpoints.TODO, useCache = false)
+        return get(context, Endpoints.HEALTH, useCache = UseCache.NO)
     }
 
     fun testNextCloudConnection(context: Context, nextCloudConfig: NextCloudConfig): ApiResult {
@@ -310,19 +319,17 @@ class ApiManager private constructor() {
 
     fun clearEndpointCache(context: Context, endpoint: String) {
         val apiCache = ApiCache(context.applicationContext)
-        val cacheKeyGet = generateCacheKey(endpoint, "GET")
-        val cacheKeyPost = generateCacheKey(endpoint, "POST")
-        val cacheKeyPut = generateCacheKey(endpoint, "PUT")
-        val cacheKeyDelete = generateCacheKey(endpoint, "DELETE")
-
-        apiCache.remove(cacheKeyGet)
-        apiCache.remove(cacheKeyPost)
-        apiCache.remove(cacheKeyPut)
-        apiCache.remove(cacheKeyDelete)
+        apiCache.removeByEndpointPrefix(endpoint)
     }
 
     sealed class ApiResult {
-        data class Success(val data: String) : ApiResult()
+        data class Success(val data: String, val cached: Boolean = false) : ApiResult()
         data class Error(val message: String, val cached: Boolean = false) : ApiResult()
+    }
+
+     enum class UseCache {
+        YES,       // Always use cache if available
+        NO,        // Never use cache
+        PARTIAL    // Use cache only if no network
     }
 }

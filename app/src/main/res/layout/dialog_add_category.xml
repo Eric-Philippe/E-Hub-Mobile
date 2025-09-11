@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/dialogTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Category"
+            android:textSize="22sp"
+            android:textColor="#1A1A1A"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Content with flexible space -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="500dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Category Name -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:textColorHint="#666666"
+                    app:boxStrokeColor="#333333"
+                    app:hintTextColor="#666666"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/categoryNameEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Category Name"
+                        android:inputType="text"
+                        android:textColor="#333333"
+                        android:textColorHint="#666666"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Category Description -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:textColorHint="#666666"
+                    app:boxStrokeColor="#333333"
+                    app:hintTextColor="#666666"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/categoryDescriptionEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Description (Optional)"
+                        android:inputType="textMultiLine"
+                        android:textColor="#333333"
+                        android:textColorHint="#666666"
+                        android:textSize="16sp"
+                        android:minLines="2"
+                        android:maxLines="3" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Color Field with Indicator -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose Color:"
+                    android:textSize="16sp"
+                    android:textColor="#1A1A1A"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColorHint="#666666"
+                        app:boxStrokeColor="#333333"
+                        app:hintTextColor="#666666"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/categoryColorEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Color (e.g. #2196F3)"
+                            android:inputType="text"
+                            android:textColor="#333333"
+                            android:textColorHint="#666666"
+                            android:textSize="16sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Color Preview Indicator -->
+                    <View
+                        android:id="@+id/colorPreviewIndicator"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="#2196F3"
+                        android:elevation="2dp" />
+
+                </LinearLayout>
+
+                <!-- Color Picker Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quick Colors"
+                        android:textSize="14sp"
+                        android:textColor="#666666"
+                        android:layout_marginBottom="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="start">
+
+                        <Button
+                            android:id="@+id/colorButton1"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#2196F3"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton2"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#4CAF50"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton3"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#FF9800"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton4"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#9C27B0"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton5"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#F44336"
+                            android:layout_marginEnd="8dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="start"
+                        android:layout_marginTop="8dp">
+
+                        <Button
+                            android:id="@+id/colorButton6"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#795548"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton7"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#607D8B"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton8"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#E91E63"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/colorButton9"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="#00BCD4"
+                            android:layout_marginEnd="8dp" />
+
+                        <Button
+                            android:id="@+id/randomColorButton"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:text="?"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF"
+                            android:background="#666666" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cancel"
+                android:textColor="#666666"
+                android:textSize="16sp"
+                android:background="@drawable/btn_outline"
+                android:layout_marginEnd="8dp"
+                android:minHeight="48dp" />
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:background="@drawable/btn_primary"
+                android:layout_marginStart="8dp"
+                android:minHeight="48dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

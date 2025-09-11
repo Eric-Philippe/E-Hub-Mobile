@@ -44,6 +44,8 @@
     <string name="save_api">Save</string>
     <string name="api_status_not_configured">API not configured</string>
     <string name="api_status_connected">✓ Connection successful</string>
+    <string name="api_status_unauthorized">✗ API Key unauthorized</string>
+    <string name="api_status_unreachable">✗ Server unreachable</string>
     <string name="api_status_testing">Testing…</string>
     <string name="api_key_saved">API key saved</string>
 
