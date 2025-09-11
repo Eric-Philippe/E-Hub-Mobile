@@ -61,6 +61,10 @@
             android:name=".ToBuyCategoriesActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".NotesActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

@@ -149,6 +149,37 @@
 
                 </LinearLayout>
 
+                <!-- Secret Key -->
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="16dp">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/secret_key"
+                            android:textSize="16sp"
+                            android:textColor="#333333"
+                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginBottom="8dp" />
+
+                    <EditText
+                            android:id="@+id/secretKeyInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:hint="@string/secret_key_hint"
+                            android:textSize="14sp"
+                            android:textColor="#333333"
+                            android:textColorHint="#999999"
+                            android:background="@drawable/bg_input"
+                            android:padding="12dp"
+                            android:inputType="textPassword"
+                            android:autofillHints="password" />
+
+                </LinearLayout>
+
                 <!-- API Actions -->
                 <LinearLayout
                         android:layout_width="match_parent"
