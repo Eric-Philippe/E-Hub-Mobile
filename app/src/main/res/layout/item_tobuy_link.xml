@@ -101,6 +101,23 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
+        <!-- Copy Link Button (to the left of the Link Button) -->
+        <Button
+            android:id="@+id/copyLinkButton"
+            android:layout_width="wrap_content"
+            android:minWidth="80dp"
+            android:layout_height="32dp"
+            android:text="Copy Link"
+            android:textSize="11sp"
+            android:textAllCaps="false"
+            android:background="@drawable/btn_outline"
+            android:textColor="@color/gray_400"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            app:layout_constraintEnd_toStartOf="@+id/linkButton"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

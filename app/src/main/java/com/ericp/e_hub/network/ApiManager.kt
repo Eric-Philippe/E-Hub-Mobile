@@ -275,8 +275,7 @@ class ApiManager private constructor() {
     }
 
     suspend fun testConnection(context: Context): ApiResult {
-        // TODO: Replace with a proper endpoint to test connectivity
-        return get(context, Endpoints.TODO, useCache = UseCache.NO)
+        return get(context, Endpoints.HEALTH, useCache = UseCache.NO)
     }
 
     fun testNextCloudConnection(context: Context, nextCloudConfig: NextCloudConfig): ApiResult {

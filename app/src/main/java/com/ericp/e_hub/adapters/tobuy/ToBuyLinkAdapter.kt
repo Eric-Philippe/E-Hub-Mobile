@@ -12,6 +12,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.R
 import com.ericp.e_hub.dto.ToBuyLinkDto
 import com.squareup.picasso.Picasso
+import android.content.Context
+import android.content.ClipboardManager
+import android.widget.Toast
 
 class ToBuyLinkAdapter(
     private val links: List<ToBuyLinkDto>
@@ -23,6 +26,7 @@ class ToBuyLinkAdapter(
         val priceTextView: TextView = itemView.findViewById(R.id.priceTextView)
         val favouriteIndicator: View = itemView.findViewById(R.id.favouriteIndicator)
         val noImagePlaceholder: View = itemView.findViewById(R.id.noImagePlaceholder)
+        val copyLinkButton: Button = itemView.findViewById(R.id.copyLinkButton) // Add this line
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LinkViewHolder {
@@ -38,6 +42,15 @@ class ToBuyLinkAdapter(
         holder.linkButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
             holder.itemView.context.startActivity(intent)
+        }
+
+        // Set click listener for the copy link button
+        holder.copyLinkButton.setOnClickListener {
+            val clipboard = holder.itemView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = android.content.ClipData.newPlainText("URL", link.url)
+            clipboard.setPrimaryClip(clip)
+
+            Toast.makeText(holder.itemView.context, "Link copied to clipboard", Toast.LENGTH_SHORT).show()
         }
 
         // Set price if available

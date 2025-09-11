@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 
 class ApiConfig(context: Context) {
+    private var isAuthorized: Boolean = true
 
     companion object {
         const val PREFS_NAME = "api_config"
@@ -39,5 +40,13 @@ class ApiConfig(context: Context) {
 
     fun isApiKeyConfigured(): Boolean {
         return !getApiKey().isNullOrBlank()
+    }
+
+    fun isAuthorized(): Boolean {
+        return this.isAuthorized
+    }
+
+    fun setAuthorized(authorized: Boolean) {
+        this.isAuthorized = authorized
     }
 }

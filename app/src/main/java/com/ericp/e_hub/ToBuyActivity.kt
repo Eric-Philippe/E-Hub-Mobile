@@ -1,16 +1,13 @@
 package com.ericp.e_hub
 
-import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,6 +43,7 @@ class ToBuyActivity : FragmentActivity() {
     private lateinit var emptyStateLayout: View
     private lateinit var manageCategoriesButton: Button
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var filterToggle: ImageButton
 
     // Data / helpers
     private lateinit var categoryAdapter: CategoryAccordionAdapter
@@ -96,6 +94,7 @@ class ToBuyActivity : FragmentActivity() {
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
         manageCategoriesButton = findViewById(R.id.manageCategoriesButton)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
+        filterToggle = findViewById(R.id.filterToggle) // ADDED
     }
 
     private fun setupRecyclerView() {
@@ -261,6 +260,15 @@ class ToBuyActivity : FragmentActivity() {
 
         swipeRefreshLayout.setOnRefreshListener {
             fetchToBuyItems()
+        }
+
+        filterToggle.setOnClickListener { // ADDED
+            val searchFilterLayout: LinearLayout = findViewById(R.id.searchFilterLayout)
+            searchFilterLayout.visibility = if (searchFilterLayout.visibility == View.VISIBLE) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
         }
     }
 
