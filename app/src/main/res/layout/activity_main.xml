@@ -216,6 +216,77 @@
 
             </LinearLayout>
 
+            <!-- Third Row -->
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                        android:id="@+id/notesButton"
+                        android:layout_width="0dp"
+                        android:layout_height="120dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="@drawable/button_main_style"
+                        android:layout_marginEnd="8dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_notes"
+                            android:contentDescription="@string/notes_title"
+                            android:layout_marginBottom="8dp" />
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/notes_title"
+                            android:textSize="14sp"
+                            android:textColor="#333333"
+                            android:fontFamily="sans-serif-medium"
+                            android:textAlignment="center" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                        android:id="@+id/banner"
+                        android:layout_width="0dp"
+                        android:layout_height="120dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:background="@drawable/button_main_style"
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                    <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_todo"
+                            android:contentDescription="@string/todo_list"
+                            android:layout_marginBottom="8dp" />
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/todo_list"
+                            android:textSize="14sp"
+                            android:textColor="#333333"
+                            android:fontFamily="sans-serif-medium"
+                            android:textAlignment="center" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <!-- Settings Button (Bottom) -->
             <LinearLayout
                 android:id="@+id/settingsButton"

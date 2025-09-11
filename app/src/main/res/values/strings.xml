@@ -202,4 +202,7 @@
     <string name="nonogram_total_loading">Loading total…</string>
     <string name="nonogram_total_completed">Grand total completed: %1$d</string>
     <string name="nonogram_total_parse_error">Unable to parse total.</string>
+
+    <!-- Notes Activity -->
+    <string name="notes_title">Notes</string>
 </resources>
