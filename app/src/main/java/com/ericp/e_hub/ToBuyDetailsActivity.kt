@@ -85,7 +85,7 @@ class ToBuyDetailsActivity : FragmentActivity() {
     }
 
     private fun setupModalManager() {
-        modalManager = AddToBuyModalManager(this) { newItem ->
+        modalManager = AddToBuyModalManager(this) { _ ->
             // Callback after creating a new item
             // Not used in this activity
         }
@@ -177,7 +177,7 @@ class ToBuyDetailsActivity : FragmentActivity() {
 
         // Set price
         if (item.estimatedPrice != null && item.estimatedPrice > 0) {
-            priceText.text = "${item.estimatedPrice}€"
+            priceText.text = getString(R.string.price, item.estimatedPrice)
             priceLayout.visibility = View.VISIBLE
         } else {
             priceLayout.visibility = View.GONE
@@ -185,7 +185,7 @@ class ToBuyDetailsActivity : FragmentActivity() {
 
         // Set bought status
         if (!item.bought.isNullOrBlank()) {
-            boughtText.text = "Yes"
+            boughtText.text = getString(R.string.yes)
             boughtLayout.visibility = View.VISIBLE
         } else {
             boughtLayout.visibility = View.GONE

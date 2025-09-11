@@ -165,7 +165,7 @@ class EHubApiHelper(private val context: Context) {
         }
 
         CoroutineScope(Dispatchers.Main).launch {
-            when (val result = apiManager.post(context, Endpoints.NONOGRAM_SUBMIT, data)) {
+            when (val result = apiManager.post(context, Endpoints.NONOGRAM, data)) {
                 is ApiManager.ApiResult.Success -> {
                     onSuccess(result.data)
                 }

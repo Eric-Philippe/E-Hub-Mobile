@@ -8,6 +8,8 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import androidx.core.content.withStyledAttributes
+import androidx.core.graphics.toColorInt
 import com.ericp.e_hub.R // Ajout de l'import pour R
 import kotlin.math.cos
 import kotlin.math.min
@@ -26,15 +28,15 @@ class HexPatternView @JvmOverloads constructor(
     private val hexPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = dp(1f)
-        color = Color.parseColor("#6D071A") // base line color
+        color = "#6D071A".toColorInt()
     }
 
     private var hexRadiusPx = dp(18f)
     private val hexPaths: MutableList<Triple<Path, Float, Float>> = mutableListOf() // Path with center (cx, cy)
 
     // Color phases
-    private val topColor = Color.parseColor("#6D071A")
-    private val midColor = Color.parseColor("#444444")
+    private val topColor = "#6D071A".toColorInt()
+    private val midColor = "#444444".toColorInt()
     private val whiteColor = Color.WHITE
 
     /**
@@ -48,9 +50,9 @@ class HexPatternView @JvmOverloads constructor(
 
     init {
         attrs?.let {
-            val ta = context.obtainStyledAttributes(it, R.styleable.HexPatternView)
-            reverseColorDirection = ta.getBoolean(R.styleable.HexPatternView_reverseColorDirection, false)
-            ta.recycle()
+            context.withStyledAttributes(it, R.styleable.HexPatternView) {
+                reverseColorDirection = getBoolean(R.styleable.HexPatternView_reverseColorDirection, false)
+            }
         }
     }
 
@@ -107,7 +109,6 @@ class HexPatternView @JvmOverloads constructor(
         val h = height.toFloat().coerceAtLeast(1f)
         val topPhaseEnd = 0.35f
         val midPhaseEnd = 0.70f
-        val fadeStart = midPhaseEnd
         val fadeEnd = 1.0f
 
         for ((path, _, cy) in hexPaths) {
@@ -126,7 +127,7 @@ class HexPatternView @JvmOverloads constructor(
                     whiteColor to 0
                 }
                 else -> {
-                    val t = ((frac - fadeStart) / (fadeEnd - fadeStart)).coerceIn(0f, 1f)
+                    val t = ((frac - midPhaseEnd) / (fadeEnd - midPhaseEnd)).coerceIn(0f, 1f)
                     val blended = blend(midColor, whiteColor, t)
                     val a = ((1f - t) * 150f).toInt()
                     blended to a

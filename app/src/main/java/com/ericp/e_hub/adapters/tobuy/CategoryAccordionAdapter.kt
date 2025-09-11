@@ -354,7 +354,7 @@ class CategoryAccordionAdapter(
 
             // Set price
             if (item.estimatedPrice != null) {
-                estimatedPrice.text = itemView.context.getString(R.string.price_in_euros, item.estimatedPrice)
+                estimatedPrice.text = itemView.context.getString(R.string.price, item.estimatedPrice)
                 estimatedPrice.visibility = View.VISIBLE
             } else {
                 estimatedPrice.visibility = View.GONE

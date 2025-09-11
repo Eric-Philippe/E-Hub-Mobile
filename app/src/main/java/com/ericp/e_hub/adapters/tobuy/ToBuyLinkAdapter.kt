@@ -1,7 +1,6 @@
 package com.ericp.e_hub.adapters.tobuy
 
 import android.content.Intent
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +14,7 @@ import com.squareup.picasso.Picasso
 import android.content.Context
 import android.content.ClipboardManager
 import android.widget.Toast
+import androidx.core.net.toUri
 
 class ToBuyLinkAdapter(
     private val links: List<ToBuyLinkDto>
@@ -40,7 +40,7 @@ class ToBuyLinkAdapter(
 
         // Set button click listener to open URL
         holder.linkButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
+            val intent = Intent(Intent.ACTION_VIEW, link.url.toUri())
             holder.itemView.context.startActivity(intent)
         }
 
@@ -55,7 +55,7 @@ class ToBuyLinkAdapter(
 
         // Set price if available
         if (link.price != null) {
-            holder.priceTextView.text = "${link.price}€"
+            holder.priceTextView.text = holder.itemView.context.getString(R.string.price, link.price)
             holder.priceTextView.visibility = View.VISIBLE
         } else {
             holder.priceTextView.visibility = View.GONE

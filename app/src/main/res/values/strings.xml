@@ -1,16 +1,37 @@
 <resources>
     <!-- General App Strings -->
     <string name="app_name">E-Hub</string>
-    <string name="hello_world">Hello World!</string>
-    <string name="welcome_to_ehub">Welcome to EHub App</string>
+    <string name="welcome_message">Welcome Eric</string>
     <string name="play_nonogram">Play Random Nonogram</string>
-    <string name="upload">Upload</string>
     <string name="connection_error">✗ Connection error: %1$s</string>
-    <string name="price">%1$d€</string>
-    <string name="sort">Sort:</string>
+    <string name="yes">Yes</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="upload">Upload</string>
+    <string name="copy_link">Copy Link</string>
+
+    <!-- Common UI Strings -->
+    <string name="toggle_filter">Toggle Filter</string>
+    <string name="details_title">Details</string>
     <string name="category">Category</string>
+    <string name="description_label">Description</string>
+    <string name="filter_label">Filter:</string>
+    <string name="sort">Sort:</string>
+    <string name="price_label">Price</string>
+    <string name="date_label">Date</string>
+    <string name="year_label">Year</string>
+
+    <!-- Characters and Symbols -->
+    <string name="price">%1$d€</string>
+    <string name="question_mark">?</string>
     <string name="expand_icon">▶</string>
     <string name="cross">✕</string>
+
+    <!-- Emotes -->
+    <string name="folder_ic">📂</string>
+    <string name="link_ic">🔗</string>
+
 
     <!-- Nonogram Activity Strings -->
     <string name="current_time_placeholder">12:34</string>
@@ -45,7 +66,6 @@
     <string name="api_status_not_configured">API not configured</string>
     <string name="api_status_connected">✓ Connection successful</string>
     <string name="api_status_unauthorized">✗ API Key unauthorized</string>
-    <string name="api_status_unreachable">✗ Server unreachable</string>
     <string name="api_status_testing">Testing…</string>
     <string name="api_key_saved">API key saved</string>
 
@@ -61,7 +81,7 @@
     <string name="connected_to_nextcloud">✓ Connected to NextCloud</string>
     <string name="no_photos_selected">No photos selected</string>
     <string name="upload_starting">Starting upload…</string>
-    <string name="upload_progress">Uploading photo %1$d of %2$d. %3$d%% successful, %4$d%% failed.</string>
+    <string name="upload_progress">Uploading photo %1$d of %2$d. %3$d%%successful, %4$d%% failed.</string>
     <string name="deleting_photos">Deleting photos…</string>
     <string name="preparing_to_delete">Preparing to delete %d photos</string>
     <string name="upload_complete">✓ Upload complete: %1$d successful, %2$d failed</string>
@@ -71,7 +91,6 @@
     <string name="category_button_text">● %1$s</string>
 
     <!-- NextCloud Gym Settings Activity Strings -->
-    <string name="nextcloud_gym_settings_title">NextCloud Gym Settings</string>
     <string name="nextcloud_configuration">NextCloud Configuration</string>
     <string name="nextcloud_username">Username</string>
     <string name="password">Password</string>
@@ -83,6 +102,7 @@
     <string name="add_new_item_step_3">Add New Item - Step 3 of 3</string>
     <string name="add_purchase_links">Add Purchase Links</string>
     <string name="your_links">Your Links:</string>
+    <string name="links">Links</string>
     <string name="add_new_link">Add New Link:</string>
     <string name="favourite">Favourite</string>
     <string name="remove">Remove</string>
@@ -104,18 +124,13 @@
     <string name="category_description_hint">Category Description</string>
     <string name="search_items_hint">Search items…</string>
     <string name="not_bought">Not Bought</string>
-    <string name="sort_by_price">Sort by Price</string>
     <string name="item_title">Item Title</string>
-
-    <!-- Category Accordion Adapter Strings -->
     <string name="category_total_price">Total: €%d</string>
-    <string name="price_in_euros">%d€</string>
 
     <!-- To Buy Activity Strings -->
     <string name="back_button">← Back</string>
     <string name="to_buy_title">To Buy</string>
-    <string name="zero_price">$0</string>
-    <string name="filter_label">Filter:</string>
+    <string name="zero_price">0€</string>
     <string name="all_items">All Items</string>
     <string name="empty_state_icon">📝</string>
     <string name="no_items_to_buy">No items to buy yet</string>
@@ -134,12 +149,16 @@
     <string name="next_arrow">Next →</string>
     <string name="category_name">Category Name</string>
     <string name="url">URL</string>
-    <string name="price_label">Price</string>
     <string name="color_hex_hint">Color (#hex)</string>
 
+    <!-- Category management item -->
+    <string name="category_name_default">Category Name</string>
+    <string name="category_description_default">Category Description</string>
+    <string name="manage_categories">Manage Categories</string>
+    <string name="no_categories_yet">No categories yet</string>
+    <string name="tap_plus_to_add_category">Tap the + button to add your first category</string>
+
     <!-- To Buy Item Strings -->
-    <string name="link_count_single">%1$d link</string>
-    <string name="link_count_plural">%1$d links</string>
     <string name="bought">Bought</string>
 
     <!-- Cache Management Strings -->
@@ -154,9 +173,33 @@
     <string name="import_settings">Import</string>
     <string name="export_settings">Export</string>
 
+    <!-- Item To Buy Link placeholder strings -->
+    <string name="image_placeholder">🖼</string>
+    <string name="sample_price">12€</string>
+    <string name="view_link">View Link</string>
+    <string name="no_links_available">No links available</string>
+
+    <!-- Dialog Add Category Strings -->
+    <string name="add_category_title">Add Category</string>
+    <string name="dialog_category_name_hint">Category Name</string>
+    <string name="dialog_category_description_hint">Description (Optional)</string>
+    <string name="choose_color">Choose Color:</string>
+    <string name="color_hint_example">Color (e.g. #2196F3)</string>
+    <string name="item_details_title">Item Details</string>
+
     <!-- Plurals -->
     <plurals name="item_count">
         <item quantity="one">%d item</item>
         <item quantity="other">%d items</item>
     </plurals>
+    
+    <plurals name="link_count">
+        <item quantity="one">%d link</item>
+        <item quantity="other">%d links</item>
+    </plurals>
+
+    <!-- Nonogram Grand Total Strings -->
+    <string name="nonogram_total_loading">Loading total…</string>
+    <string name="nonogram_total_completed">Grand total completed: %1$d</string>
+    <string name="nonogram_total_parse_error">Unable to parse total.</string>
 </resources>

@@ -23,7 +23,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="E-Hub"
+                android:text="@string/app_name"
                 android:textSize="28sp"
                 android:textColor="#333333"
                 android:fontFamily="sans-serif-medium"
@@ -32,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welcome Eric"
+                android:text="@string/welcome_message"
                 android:textSize="16sp"
                 android:textColor="#666666"
                 android:fontFamily="sans-serif"
@@ -60,7 +60,6 @@
         android:layout_height="@dimen/hex_pattern_height"
     />
 
-    <!-- Buttons Container anchored at bottom -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -79,6 +78,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginBottom="16dp">
@@ -99,6 +99,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_nonogram"
+                        android:contentDescription="@string/play_nonogram"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -128,6 +129,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_nextcloud"
+                        android:contentDescription="@string/nextcloud_gym_title"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -147,6 +149,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginBottom="16dp">
@@ -167,6 +170,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_shopping"
+                        android:contentDescription="@string/to_buy_list"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -196,6 +200,7 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@drawable/ic_todo"
+                        android:contentDescription="@string/todo_list"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -227,6 +232,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_settings"
+                    android:contentDescription="@string/settings"
                     android:layout_marginEnd="8dp" />
 
                 <TextView

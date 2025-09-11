@@ -94,7 +94,7 @@ class ToBuyCategoriesActivity : FragmentActivity() {
             ): Boolean = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
+                val position = viewHolder.bindingAdapterPosition
                 val category = categories[position]
 
                 when (direction) {
@@ -181,7 +181,10 @@ class ToBuyCategoriesActivity : FragmentActivity() {
             .setPositiveButton("Delete") { _, _ -> deleteCategory(category) }
             .setNegativeButton("Cancel") { _, _ ->
                 // Reset the swipe position
-                categoryAdapter.notifyDataSetChanged()
+                val index = categories.indexOf(category)
+                if (index >= 0) {
+                    categoryAdapter.notifyItemChanged(index)
+                }
             }
             .show()
     }
@@ -264,7 +267,10 @@ class ToBuyCategoriesActivity : FragmentActivity() {
                     runOnUiThread {
                         Toast.makeText(this, "Failed to delete category: $error", Toast.LENGTH_LONG).show()
                         // Reset the adapter to show the item again
-                        categoryAdapter.notifyDataSetChanged()
+                        val index = categories.indexOfFirst { it.id == category.id }
+                        if (index >= 0) {
+                            categoryAdapter.notifyItemChanged(index)
+                        }
                     }
                 }
             )
@@ -289,10 +295,16 @@ class ToBuyCategoriesActivity : FragmentActivity() {
                     val gson = Gson()
                     val categoryListType = object : TypeToken<List<ToBuyCategoryDto>>() {}.type
                     val fetchedCategories: List<ToBuyCategoryDto> = gson.fromJson(response, categoryListType)
+                    val oldSize = categories.size
                     categories.clear()
                     categories.addAll(fetchedCategories)
                     runOnUiThread {
-                        categoryAdapter.notifyDataSetChanged()
+                        if (oldSize > 0) {
+                            categoryAdapter.notifyItemRangeRemoved(0, oldSize)
+                        }
+                        if (categories.isNotEmpty()) {
+                            categoryAdapter.notifyItemRangeInserted(0, categories.size)
+                        }
                         updateEmptyState()
                     }
                 } catch (e: Exception) {

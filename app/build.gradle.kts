@@ -51,8 +51,8 @@ dependencies {
     implementation(libs.gson)
 
     // Image loading
-    implementation("com.squareup.picasso:picasso:2.8")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(libs.picasso)
+    implementation(libs.androidx.swiperefreshlayout)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

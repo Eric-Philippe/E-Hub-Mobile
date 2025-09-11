@@ -3,6 +3,7 @@ package com.ericp.e_hub
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +15,9 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.adapters.PhotoAdapter
@@ -50,6 +54,7 @@ class NextCloudGymActivity : Activity() {
     companion object {
         private const val REQUEST_SELECT_PHOTOS = 1001
         private const val REQUEST_DELETE_PHOTOS = 1002
+        private const val REQUEST_PHOTO_PERMISSION = 2001
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,12 +104,59 @@ class NextCloudGymActivity : Activity() {
         }
 
         selectPhotosButton.setOnClickListener {
-            openGallery()
+            checkPhotoPermissionAndOpenGallery()
         }
 
         uploadButton.setOnClickListener {
             uploadPhotos()
         }
+    }
+
+    private fun checkPhotoPermissionAndOpenGallery() {
+        // Android 14+: request selected photos access
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES),
+                REQUEST_PHOTO_PERMISSION
+            )
+        } else {
+            openGallery()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_PHOTO_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openGallery()
+            } else {
+                showPhotoPermissionDeniedDialog()
+            }
+        }
+    }
+
+    private fun showPhotoPermissionDeniedDialog() {
+        val message =
+            "Please allow access to selected photos in your device settings. On Android 14+, you may need to select specific photos for this app."
+        AlertDialog.Builder(this)
+            .setTitle("Photo Access Required")
+            .setMessage(message)
+            .setPositiveButton("Open Settings") { _, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.fromParts("package", packageName, null)
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun openGallery() {
@@ -113,7 +165,7 @@ class NextCloudGymActivity : Activity() {
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
-        // Grant URI permission to external apps (e.g., Google Photos)
+        // For Android 14+, this will show the "Selected Photos" picker
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         startActivityForResult(intent, REQUEST_SELECT_PHOTOS)
     }
@@ -299,55 +351,41 @@ class NextCloudGymActivity : Activity() {
         }
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     private fun deletePhotosFromDevice(uris: List<Uri>) {
         if (uris.isEmpty()) return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris)
-                startIntentSenderForResult(pendingIntent.intentSender, REQUEST_DELETE_PHOTOS, null, 0, 0, 0)
-            } catch (_: IllegalArgumentException) {
-                // This can happen if URIs are not from MediaStore (e.g. Google Photos).
-                // Fallback to individual deletion.
-                var couldNotDelete = false
-                for (uri in uris) {
-                    try {
-                        if (!DocumentsContract.deleteDocument(contentResolver, uri)) {
-                            couldNotDelete = true
-                        }
-                    } catch (_: Exception) {
-                        // If DocumentsContract fails, try contentResolver.delete as a last resort.
-                        try {
-                            if (contentResolver.delete(uri, null, null) == 0) {
-                                couldNotDelete = true
-                            }
-                        } catch (e2: Exception) {
-                            couldNotDelete = true
-                            e2.printStackTrace()
-                        }
-                    }
-                }
-                if (couldNotDelete) {
-                    Toast.makeText(this, "Could not delete all photos.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Successfully deleted photos.", Toast.LENGTH_SHORT).show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(this, "Could not start delete request.", Toast.LENGTH_SHORT).show()
-            }
-        } else {
+        try {
+            val pendingIntent = MediaStore.createDeleteRequest(contentResolver, uris)
+            startIntentSenderForResult(pendingIntent.intentSender, REQUEST_DELETE_PHOTOS, null, 0, 0, 0)
+        } catch (_: IllegalArgumentException) {
+            // This can happen if URIs are not from MediaStore (e.g. Google Photos).
+            // Fallback to individual deletion.
+            var couldNotDelete = false
             for (uri in uris) {
                 try {
-                    contentResolver.delete(uri, null, null)
-                } catch (e: SecurityException) {
-                    e.printStackTrace()
-                    // Can't do much here on older versions if we don't have permission
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                    if (!DocumentsContract.deleteDocument(contentResolver, uri)) {
+                        couldNotDelete = true
+                    }
+                } catch (_: Exception) {
+                    // If DocumentsContract fails, try contentResolver.delete as a last resort.
+                    try {
+                        if (contentResolver.delete(uri, null, null) == 0) {
+                            couldNotDelete = true
+                        }
+                    } catch (e2: Exception) {
+                        couldNotDelete = true
+                        e2.printStackTrace()
+                    }
                 }
             }
+            if (couldNotDelete) {
+                Toast.makeText(this, "Could not delete all photos.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Successfully deleted photos.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Could not start delete request.", Toast.LENGTH_SHORT).show()
         }
     }
 

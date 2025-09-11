@@ -19,7 +19,7 @@
             android:id="@+id/dialogTitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add Category"
+            android:text="@string/add_category_title"
             android:textSize="22sp"
             android:textColor="#1A1A1A"
             android:fontFamily="sans-serif-medium"
@@ -51,7 +51,7 @@
                         android:id="@+id/categoryNameEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Category Name"
+                        android:hint="@string/dialog_category_name_hint"
                         android:inputType="text"
                         android:textColor="#333333"
                         android:textColorHint="#666666"
@@ -73,7 +73,7 @@
                         android:id="@+id/categoryDescriptionEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Description (Optional)"
+                        android:hint="@string/dialog_category_description_hint"
                         android:inputType="textMultiLine"
                         android:textColor="#333333"
                         android:textColorHint="#666666"
@@ -83,17 +83,18 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Color Field with Indicator -->
+                <!-- Choose Color label -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Choose Color:"
+                    android:text="@string/choose_color"
                     android:textSize="16sp"
                     android:textColor="#1A1A1A"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"
                     android:fontFamily="sans-serif-medium" />
 
+                <!-- Color Field with Indicator -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -113,7 +114,7 @@
                             android:id="@+id/categoryColorEditText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Color (e.g. #2196F3)"
+                            android:hint="@string/color_hint_example"
                             android:inputType="text"
                             android:textColor="#333333"
                             android:textColorHint="#666666"
@@ -143,7 +144,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Quick Colors"
+                        android:text="@string/quick_colors"
                         android:textSize="14sp"
                         android:textColor="#666666"
                         android:layout_marginBottom="8dp" />
@@ -230,7 +231,7 @@
                             android:id="@+id/randomColorButton"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:text="?"
+                            android:text="@string/question_mark"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="#FFFFFF"
@@ -256,7 +257,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Cancel"
+                android:text="@string/cancel"
                 android:textColor="#666666"
                 android:textSize="16sp"
                 android:background="@drawable/btn_outline"
@@ -268,7 +269,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Save"
+                android:text="@string/save"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:background="@drawable/btn_primary"

@@ -9,6 +9,8 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.graphics.toColorInt
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -94,7 +96,7 @@ class ToBuyActivity : FragmentActivity() {
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
         manageCategoriesButton = findViewById(R.id.manageCategoriesButton)
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
-        filterToggle = findViewById(R.id.filterToggle) // ADDED
+        filterToggle = findViewById(R.id.filterToggle)
     }
 
     private fun setupRecyclerView() {
@@ -262,20 +264,16 @@ class ToBuyActivity : FragmentActivity() {
             fetchToBuyItems()
         }
 
-        filterToggle.setOnClickListener { // ADDED
+        filterToggle.setOnClickListener {
             val searchFilterLayout: LinearLayout = findViewById(R.id.searchFilterLayout)
-            searchFilterLayout.visibility = if (searchFilterLayout.visibility == View.VISIBLE) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
+            searchFilterLayout.isVisible = !searchFilterLayout.isVisible
         }
     }
 
     private fun setFilterState(notBought: Boolean) {
         showOnlyNotBought = notBought
-        filterNotBoughtButton.setTextColor(if (notBought) getColor(android.R.color.white) else Color.parseColor("#2196F3"))
-        filterAllButton.setTextColor(if (notBought) Color.parseColor("#666666") else getColor(android.R.color.white))
+        filterNotBoughtButton.setTextColor(if (notBought) getColor(android.R.color.white) else "#2196F3".toColorInt())
+        filterAllButton.setTextColor(if (notBought) "#666666".toColorInt() else getColor(android.R.color.white))
         filterNotBoughtButton.isSelected = notBought
         filterAllButton.isSelected = !notBought
         updateCategorySections()
@@ -335,8 +333,8 @@ class ToBuyActivity : FragmentActivity() {
             SortMode.DATE_OLDEST -> "Date ↑"
             else -> "Date"
         }
-        val activeColor = Color.parseColor("#2196F3")          // changed from white
-        val inactiveColor = Color.parseColor("#666666")
+        val activeColor = "#2196F3".toColorInt()
+        val inactiveColor = "#666666".toColorInt()
         fun setBtn(btn: Button, active: Boolean) {
             btn.isSelected = active
             btn.setTextColor(if (active) activeColor else inactiveColor)

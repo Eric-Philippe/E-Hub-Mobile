@@ -4,8 +4,11 @@ import android.app.Activity
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.edit
+import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.Endpoints
 
 class NonogramSettingsActivity : Activity() {
 
@@ -13,6 +16,7 @@ class NonogramSettingsActivity : Activity() {
     private lateinit var timerSwitch: SwitchCompat
     private lateinit var backButton: Button
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var nonogramTotalTextView: TextView
 
     companion object {
         const val PREFS_NAME = "nonogram_preferences"
@@ -27,12 +31,14 @@ class NonogramSettingsActivity : Activity() {
         initializeComponents()
         loadSettings()
         setupListeners()
+        fetchNonogramTotal()
     }
 
     private fun initializeComponents() {
         vibrationSwitch = findViewById(R.id.vibrationSwitch)
         timerSwitch = findViewById(R.id.timerSwitch)
         backButton = findViewById(R.id.backButton)
+        nonogramTotalTextView = findViewById(R.id.nonogramTotalTextView)
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
     }
 
@@ -57,5 +63,25 @@ class NonogramSettingsActivity : Activity() {
         backButton.setOnClickListener {
             finish()
         }
+    }
+
+    private fun fetchNonogramTotal() {
+        val apiHelper = EHubApiHelper(this)
+        nonogramTotalTextView.text = getString(R.string.nonogram_total_loading)
+        apiHelper.fetchDataAsync(
+            endpoint = Endpoints.NONOGRAM + "/stats/total-games",
+            onSuccess = { data ->
+                // Data is already the number of completed nonograms
+                val total = data.toIntOrNull()
+                if (total != null) {
+                    nonogramTotalTextView.text = getString(R.string.nonogram_total_completed, total)
+                } else {
+                    nonogramTotalTextView.text = getString(R.string.nonogram_total_parse_error)
+                }
+            },
+            onError = { errorMsg ->
+                nonogramTotalTextView.text = errorMsg
+            }
+        )
     }
 }

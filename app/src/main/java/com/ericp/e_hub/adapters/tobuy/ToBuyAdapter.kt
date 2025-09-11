@@ -70,11 +70,12 @@ class ToBuyAdapter(
             }
 
             // Set link count
-            val linkCountText = if (item.links.size == 1) {
-                itemView.context.getString(R.string.link_count_single, item.links.size)
-            } else {
-                itemView.context.getString(R.string.link_count_plural, item.links.size)
-            }
+            val linkCountText = itemView.context.resources.getQuantityString(
+                R.plurals.link_count,
+                item.links.size,
+                item.links.size
+            )
+
             linkCount.text = linkCountText
 
             // Set buy status

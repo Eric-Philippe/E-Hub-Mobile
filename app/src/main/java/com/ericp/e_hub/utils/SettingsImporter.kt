@@ -1,6 +1,7 @@
 package com.ericp.e_hub.utils
 
 import android.content.Context
+import androidx.core.content.edit
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.config.NextCloudConfig
 import com.ericp.e_hub.NonogramSettingsActivity
@@ -13,7 +14,7 @@ class SettingsImporter(private val context: Context) {
     fun importSettingsFromXml(inputStream: InputStream) {
         val apiConfig = ApiConfig(context)
         val nextCloudConfig = NextCloudConfig(context)
-        val nonogramPrefs = context.getSharedPreferences(NonogramSettingsActivity.PREFS_NAME, Context.MODE_PRIVATE).edit()
+        val nonogramPrefs = context.getSharedPreferences(NonogramSettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
 
         val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = docBuilder.parse(inputStream)
@@ -33,9 +34,9 @@ class SettingsImporter(private val context: Context) {
 
         // Nonogram Preferences
         val nonogramPrefsNode = rootElement.getElementsByTagName("NonogramPreferences").item(0) as Element
-        nonogramPrefs.putBoolean(NonogramSettingsActivity.KEY_VIBRATION_ENABLED, nonogramPrefsNode.getElementsByTagName("vibrationEnabled").item(0).textContent.toBoolean())
-        nonogramPrefs.putBoolean(NonogramSettingsActivity.KEY_TIMER_VISIBLE, nonogramPrefsNode.getElementsByTagName("timerVisible").item(0).textContent.toBoolean())
-        nonogramPrefs.apply()
+        nonogramPrefs.edit {
+            putBoolean(NonogramSettingsActivity.KEY_VIBRATION_ENABLED, nonogramPrefsNode.getElementsByTagName("vibrationEnabled").item(0).textContent.toBoolean())
+            putBoolean(NonogramSettingsActivity.KEY_TIMER_VISIBLE, nonogramPrefsNode.getElementsByTagName("timerVisible").item(0).textContent.toBoolean())
+        }
     }
 }
-
