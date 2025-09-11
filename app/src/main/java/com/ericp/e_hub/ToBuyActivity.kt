@@ -28,6 +28,7 @@ import com.google.gson.reflect.TypeToken
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class ToBuyActivity : FragmentActivity() {
     // UI
@@ -44,6 +45,7 @@ class ToBuyActivity : FragmentActivity() {
     private lateinit var addItemFab: FloatingActionButton
     private lateinit var emptyStateLayout: View
     private lateinit var manageCategoriesButton: Button
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     // Data / helpers
     private lateinit var categoryAdapter: CategoryAccordionAdapter
@@ -93,6 +95,7 @@ class ToBuyActivity : FragmentActivity() {
         addItemFab = findViewById(R.id.addItemFab)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
         manageCategoriesButton = findViewById(R.id.manageCategoriesButton)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
     }
 
     private fun setupRecyclerView() {
@@ -254,6 +257,10 @@ class ToBuyActivity : FragmentActivity() {
         manageCategoriesButton.setOnClickListener {
             val intent = Intent(this, ToBuyCategoriesActivity::class.java)
             startActivity(intent)
+        }
+
+        swipeRefreshLayout.setOnRefreshListener {
+            fetchToBuyItems()
         }
     }
 
@@ -425,6 +432,9 @@ class ToBuyActivity : FragmentActivity() {
         apiHelper.fetchDataAsync(
             endpoint = Endpoints.TOBUY,
             onSuccess = { response ->
+                runOnUiThread {
+                    swipeRefreshLayout.isRefreshing = false
+                }
                 try {
                     val gson = Gson()
                     val toBuyListType = object : TypeToken<List<ToBuyDto>>() {}.type
@@ -442,6 +452,7 @@ class ToBuyActivity : FragmentActivity() {
             },
             onError = { error ->
                 runOnUiThread {
+                    swipeRefreshLayout.isRefreshing = false
                     Toast.makeText(this, "Failed to load ToBuy items: $error", Toast.LENGTH_LONG).show()
                     updateEmptyState()
                 }

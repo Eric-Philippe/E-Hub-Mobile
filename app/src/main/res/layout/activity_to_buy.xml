@@ -221,74 +221,80 @@
     </LinearLayout>
 
     <!-- Main Content Area -->
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/searchFilterLayout"
-        android:background="#FAFAFA"
-        android:padding="16dp">
+        android:layout_below="@id/searchFilterLayout">
 
-        <!-- Empty State Message -->
-        <LinearLayout
-            android:id="@+id/emptyStateLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="visible">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/empty_state_icon"
-                android:textSize="64sp"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:id="@+id/emptyStateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/no_items_to_buy"
-                android:textSize="18sp"
-                android:textColor="#666666"
-                android:fontFamily="sans-serif-light"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tap_plus_to_add"
-                android:textSize="14sp"
-                android:textColor="#999999"
-                android:fontFamily="sans-serif" />
-
-        </LinearLayout>
-
-        <!-- RecyclerView for category accordion -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/toBuyRecyclerView"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp"
-            android:visibility="gone" />
+            android:background="#FAFAFA"
+            android:padding="16dp">
 
-        <!-- Floating Action Button -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addItemFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="24dp"
-            android:src="@android:drawable/ic_input_add"
-            android:contentDescription="@string/add_item"
-            app:tint="#FFFFFF"
-            app:backgroundTint="#2196F3"
-            app:elevation="6dp"
-            app:pressedTranslationZ="12dp" />
+            <!-- Empty State Message -->
+            <LinearLayout
+                android:id="@+id/emptyStateLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="visible">
 
-    </RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/empty_state_icon"
+                    android:textSize="64sp"
+                    android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:id="@+id/emptyStateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_items_to_buy"
+                    android:textSize="18sp"
+                    android:textColor="#666666"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tap_plus_to_add"
+                    android:textSize="14sp"
+                    android:textColor="#999999"
+                    android:fontFamily="sans-serif" />
+
+            </LinearLayout>
+
+            <!-- RecyclerView for category accordion -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/toBuyRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp"
+                android:visibility="gone" />
+
+            <!-- Floating Action Button -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/addItemFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="24dp"
+                android:src="@android:drawable/ic_input_add"
+                android:contentDescription="@string/add_item"
+                app:tint="#FFFFFF"
+                app:backgroundTint="#2196F3"
+                app:elevation="6dp"
+                app:pressedTranslationZ="12dp" />
+
+        </RelativeLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

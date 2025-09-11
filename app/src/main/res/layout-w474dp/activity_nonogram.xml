@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_gradient"
+    android:fitsSystemWindows="true">
+
+    <!-- Status Bar with Clock and Timer -->
+    <LinearLayout
+        android:id="@+id/statusBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="16dp"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical">
+
+        <!-- Current Time -->
+        <TextView
+            android:id="@+id/currentTimeText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/current_time_placeholder"
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:fontFamily="sans-serif-medium"
+            android:alpha="1.0" />
+
+        <!-- Game Title -->
+        <TextView
+                android:id="@+id/gameTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="@string/nonogram_game_title"
+                android:textSize="18sp"
+                android:textColor="#555555"
+                android:textAlignment="center"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.1"/>
+
+        <!-- Game Timer -->
+        <TextView
+            android:id="@+id/timerText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/initial_timer_display"
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:fontFamily="sans-serif-medium"
+            android:textAlignment="viewEnd"
+            android:alpha="1.0" />
+
+    </LinearLayout>
+
+    <!-- Centered Card Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <!-- Card-like container for the grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:elevation="8dp"
+            android:padding="10dp"
+            android:gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp">
+
+            <GridLayout
+                android:id="@+id/nonogramGrid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:columnCount="6"
+                android:rowCount="6"
+                android:background="@android:color/transparent" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Sticky Bottom Action Bar -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:scaleX="0.7"
+        android:scaleY="0.7"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="6dp">
+
+        <!-- First Row: Reset and New Board -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="2dp">
+
+            <Button
+                android:id="@+id/resetButton"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/reset"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/btn_outline"
+                android:elevation="0dp"
+                android:drawableStart="@android:drawable/ic_menu_compass"
+                android:drawablePadding="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+            <Button
+                android:id="@+id/newGameButton"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:text="@string/new_board"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/btn_outline"
+                android:elevation="0dp"
+                android:drawableStart="@android:drawable/ic_menu_add"
+                android:drawablePadding="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+        </LinearLayout>
+
+        <!-- Second Row: Back and Settings -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/back"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/btn_outline"
+                android:elevation="0dp"
+                android:drawableStart="@android:drawable/ic_menu_revert"
+                android:drawablePadding="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+            <Button
+                android:id="@+id/nonogramSettingsButton"
+                android:layout_width="120dp"
+                android:layout_height="48dp"
+                android:text="@string/settings"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:textAllCaps="false"
+                android:background="@drawable/btn_outline"
+                android:elevation="0dp"
+                android:drawableStart="@android:drawable/ic_menu_preferences"
+                android:drawablePadding="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
+
+
+

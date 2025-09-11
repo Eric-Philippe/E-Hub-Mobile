@@ -1,4 +1,5 @@
 <resources>
     <dimen name="hex_pattern_height">200dp</dimen>
+    <dimen name="hex_pattern_height_low">40dp</dimen>
 </resources>
 
