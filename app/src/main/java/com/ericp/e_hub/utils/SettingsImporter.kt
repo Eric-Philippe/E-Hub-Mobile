@@ -24,6 +24,7 @@ class SettingsImporter(private val context: Context) {
         val apiConfigNode = rootElement.getElementsByTagName("ApiConfig").item(0) as Element
         apiConfig.setServerUrl(apiConfigNode.getElementsByTagName("serverUrl").item(0).textContent)
         apiConfig.setApiKey(apiConfigNode.getElementsByTagName("apiKey").item(0).textContent)
+        apiConfig.setSecretKey(apiConfigNode.getElementsByTagName("secretKey").item(0).textContent)
 
         // NextCloudConfig
         val nextCloudConfigNode = rootElement.getElementsByTagName("NextCloudConfig").item(0) as Element

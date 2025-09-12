@@ -11,6 +11,7 @@ class ApiConfig(context: Context) {
         const val PREFS_NAME = "api_config"
         const val KEY_API_KEY = "api_key"
         const val KEY_SERVER_URL = "server_url"
+        const val KEY_SECRET_KEY = "secret_key"
         const val DEFAULT_SERVER_URL = "https://ehub.homeserver-ericp.fr"
     }
 
@@ -48,5 +49,15 @@ class ApiConfig(context: Context) {
 
     fun setAuthorized(authorized: Boolean) {
         this.isAuthorized = authorized
+    }
+
+    fun getSecretKey(): String? {
+        return sharedPreferences.getString(KEY_SECRET_KEY, null)
+    }
+
+    fun setSecretKey(secretKey: String) {
+        sharedPreferences.edit {
+            putString(KEY_SECRET_KEY, secretKey)
+        }
     }
 }

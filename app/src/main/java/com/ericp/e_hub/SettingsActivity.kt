@@ -23,6 +23,7 @@ class SettingsActivity : Activity() {
 
     private lateinit var serverUrlInput: EditText
     private lateinit var apiKeyInput: EditText
+    private lateinit var secretKeyInput: EditText
     private lateinit var testApiButton: Button
     private lateinit var saveApiButton: Button
     private lateinit var apiStatusText: TextView
@@ -57,6 +58,7 @@ class SettingsActivity : Activity() {
 
         serverUrlInput = findViewById(R.id.serverUrlInput)
         apiKeyInput = findViewById(R.id.apiKeyInput)
+        secretKeyInput = findViewById(R.id.secretKeyInput)
         testApiButton = findViewById(R.id.testApiButton)
         saveApiButton = findViewById(R.id.saveApiButton)
         apiStatusText = findViewById(R.id.apiStatusText)
@@ -73,6 +75,7 @@ class SettingsActivity : Activity() {
         // Load API configuration
         serverUrlInput.setText(apiConfig.getServerUrl())
         apiKeyInput.setText(apiConfig.getApiKey() ?: "")
+        secretKeyInput.setText(apiConfig.getSecretKey() ?: "")
         updateApiStatus()
     }
 
@@ -164,6 +167,7 @@ class SettingsActivity : Activity() {
     private fun saveApiConfiguration() {
         val serverUrl = serverUrlInput.text.toString().trim()
         val apiKey = apiKeyInput.text.toString().trim()
+        val secretKey = secretKeyInput.text.toString().trim()
 
         if (serverUrl.isBlank()) {
             Toast.makeText(this, "Server URL cannot be empty", Toast.LENGTH_SHORT).show()
@@ -175,8 +179,14 @@ class SettingsActivity : Activity() {
             return
         }
 
+        if (secretKey.isBlank()) {
+            Toast.makeText(this, "Secret Key cannot be empty", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         apiConfig.setServerUrl(serverUrl)
         apiConfig.setApiKey(apiKey)
+        apiConfig.setSecretKey(secretKey)
 
         updateApiStatus()
         Toast.makeText(this, getString(R.string.api_key_saved), Toast.LENGTH_SHORT).show()
@@ -187,11 +197,13 @@ class SettingsActivity : Activity() {
         // Temporarily store current values
         val currentServerUrl = apiConfig.getServerUrl()
         val currentApiKey = apiConfig.getApiKey()
+        val currentSecretKey = apiConfig.getSecretKey()
 
         val testServerUrl = serverUrlInput.text.toString().trim()
         val testApiKey = apiKeyInput.text.toString().trim()
+        val testSecretKey = secretKeyInput.text.toString().trim()
 
-        if (testServerUrl.isBlank() || testApiKey.isBlank()) {
+        if (testServerUrl.isBlank() || testApiKey.isBlank() || testSecretKey.isBlank()) {
             Toast.makeText(this, "Please enter both Server URL and API Key to test", Toast.LENGTH_SHORT).show()
             return
         }
@@ -199,6 +211,7 @@ class SettingsActivity : Activity() {
         // Apply test values
         apiConfig.setServerUrl(testServerUrl)
         apiConfig.setApiKey(testApiKey)
+        apiConfig.setSecretKey(testSecretKey)
 
         apiStatusText.text = getString(R.string.api_status_testing)
         testApiButton.isEnabled = false
@@ -238,6 +251,8 @@ class SettingsActivity : Activity() {
                     apiConfig.setServerUrl(currentServerUrl)
                     if (currentApiKey != null)
                         apiConfig.setApiKey(currentApiKey)
+                    if (currentSecretKey != null)
+                        apiConfig.setSecretKey(currentSecretKey)
                 }
                 testApiButton.isEnabled = true
             }

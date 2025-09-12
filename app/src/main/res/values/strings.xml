@@ -2,7 +2,7 @@
     <!-- General App Strings -->
     <string name="app_name">E-Hub</string>
     <string name="welcome_message">Welcome Eric</string>
-    <string name="play_nonogram">Play Random Nonogram</string>
+    <string name="play_nonogram">Nonogram</string>
     <string name="connection_error">✗ Connection error: %1$s</string>
     <string name="yes">Yes</string>
     <string name="save">Save</string>
@@ -30,6 +30,7 @@
 
     <!-- Emotes -->
     <string name="folder_ic">📂</string>
+    <string name="copy_ic">📋</string>
     <string name="link_ic">🔗</string>
 
 
@@ -61,6 +62,8 @@
     <string name="webdav_endpoint_hint">/remote.php/webdav/</string>
     <string name="api_key">Clé API</string>
     <string name="api_key_hint">Input your API key</string>
+    <string name="secret_key">Encryption Key</string>
+    <string name="secret_key_hint">Input your encryption key</string>
     <string name="test_api">Test Connection</string>
     <string name="save_api">Save</string>
     <string name="api_status_not_configured">API not configured</string>
@@ -202,4 +205,9 @@
     <string name="nonogram_total_loading">Loading total…</string>
     <string name="nonogram_total_completed">Grand total completed: %1$d</string>
     <string name="nonogram_total_parse_error">Unable to parse total.</string>
+
+    <!-- Notes Activity -->
+    <string name="notes_title">Notes</string>
+    <string name="content">Content</string>
+    <string name="last_edited">Last edited: %1$s</string>
 </resources>

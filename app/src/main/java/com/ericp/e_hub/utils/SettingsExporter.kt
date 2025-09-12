@@ -30,6 +30,7 @@ class SettingsExporter(private val context: Context) {
         rootElement.appendChild(apiConfigElement)
         addTextElement(doc, apiConfigElement, "serverUrl", apiConfig.getServerUrl())
         addTextElement(doc, apiConfigElement, "apiKey", apiConfig.getApiKey() ?: "")
+        addTextElement(doc, apiConfigElement, "secretKey", apiConfig.getSecretKey() ?: "")
 
         // NextCloudConfig
         val nextCloudConfigElement = doc.createElement("NextCloudConfig")

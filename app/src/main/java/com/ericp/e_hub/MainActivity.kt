@@ -34,12 +34,6 @@ class MainActivity : Activity() {
             startActivity(intent)
         }
 
-        val settingsButton = findViewById<LinearLayout>(R.id.settingsButton)
-        settingsButton.setOnClickListener {
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
-        }
-
         val toBuyButton = findViewById<LinearLayout>(R.id.toBuyButton)
         toBuyButton.setOnClickListener {
             val intent = Intent(this, ToBuyActivity::class.java)
@@ -50,6 +44,18 @@ class MainActivity : Activity() {
         todoButton.setOnClickListener {
             // ToDo List button - currently links to nowhere as requested
             Toast.makeText(this, "ToDo List feature coming soon!", Toast.LENGTH_SHORT).show()
+        }
+
+        val notesButton = findViewById<LinearLayout>(R.id.notesButton)
+        notesButton.setOnClickListener {
+            val intent = Intent(this, NotesActivity::class.java)
+            startActivity(intent)
+        }
+
+        val settingsButton = findViewById<LinearLayout>(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
         }
 
         checkApiAndFetchData()
