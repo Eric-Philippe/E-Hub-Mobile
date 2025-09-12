@@ -42,8 +42,8 @@ class MainActivity : Activity() {
 
         val todoButton = findViewById<LinearLayout>(R.id.todoButton)
         todoButton.setOnClickListener {
-            // ToDo List button - currently links to nowhere as requested
-            Toast.makeText(this, "ToDo List feature coming soon!", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ToDoActivity::class.java)
+            startActivity(intent)
         }
 
         val notesButton = findViewById<LinearLayout>(R.id.notesButton)

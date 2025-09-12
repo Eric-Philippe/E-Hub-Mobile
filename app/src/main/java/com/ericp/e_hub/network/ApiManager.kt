@@ -57,6 +57,13 @@ class ApiManager private constructor() {
             @Body body: RequestBody
         ): Response<ResponseBody>
 
+        @PATCH
+        suspend fun patch(
+            @Url url: String,
+            @Header("Authorization") authorization: String?,
+            @Body body: RequestBody
+        ): Response<ResponseBody>
+
         @DELETE
         suspend fun delete(
             @Url url: String,
@@ -223,6 +230,42 @@ class ApiManager private constructor() {
             val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
 
             val response = service.put(
+                url = "${apiConfig.getServerUrl()}/$endpoint",
+                authorization = getAuthHeader(context),
+                body = requestBody
+            )
+
+            if (response.isSuccessful) {
+                val responseBody = response.body()?.string() ?: ""
+                ApiResult.Success(responseBody)
+            } else {
+                ApiResult.Error("HTTP Error: ${response.code()}")
+            }
+
+        } catch (e: IOException) {
+            ApiResult.Error("Network error: ${e.message}")
+        } catch (e: Exception) {
+            ApiResult.Error("Unexpected error: ${e.message}")
+        }
+    }
+
+    suspend fun patch(
+        context: Context,
+        endpoint: String,
+        data: Any
+    ): ApiResult {
+        val apiConfig = ApiConfig(context.applicationContext)
+
+        if (!isNetworkAvailable(context)) {
+            return ApiResult.Error("No network connection")
+        }
+
+        return try {
+            val service = createRetrofitService(context)
+            val jsonBody = gson.toJson(data)
+            val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
+
+            val response = service.patch(
                 url = "${apiConfig.getServerUrl()}/$endpoint",
                 authorization = getAuthHeader(context),
                 body = requestBody

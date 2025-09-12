@@ -3,16 +3,18 @@ package com.ericp.e_hub.utils
 import android.content.Context
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.network.ApiManager
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.text.get
 
 /**
  * Class for managing API interactions
  */
-class EHubApiHelper(private val context: Context) {
+class EHubApiHelper(val context: Context) {
 
-    private val apiManager = ApiManager.getInstance()
+    public val apiManager = ApiManager.getInstance()
     private val apiConfig = ApiConfig(context)
 
     /**
@@ -100,6 +102,29 @@ class EHubApiHelper(private val context: Context) {
         }
     }
 
+    fun patchAsync(
+        endpoint: String,
+        data: Any,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (!isApiConfigured()) {
+            onError("API not configured. Please set your API key in settings.")
+            return
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            when (val result = apiManager.patch(context, endpoint, data)) {
+                is ApiManager.ApiResult.Success -> {
+                    onSuccess(result.data)
+                }
+                is ApiManager.ApiResult.Error -> {
+                    onError("API Error: ${result.message}")
+                }
+            }
+        }
+    }
+
     fun deleteAsync(
         endpoint: String,
         onSuccess: () -> Unit,
@@ -121,6 +146,40 @@ class EHubApiHelper(private val context: Context) {
             }
         }
     }
+
+    inline fun <reified T> fetchDataAndParseAsync(
+        endpoint: String,
+        noinline onSuccess: (T) -> Unit,
+        noinline onError: (String) -> Unit,
+        allowCache: (ApiManager.UseCache) = ApiManager.UseCache.PARTIAL
+    ) {
+        if (!isApiConfigured()) {
+            onError("API not configured. Please set your API key in settings.")
+            return
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            when (val result = apiManager.get(context, endpoint, allowCache)) {
+                is ApiManager.ApiResult.Success -> {
+                    try {
+                        val parsed = Gson().fromJson(result.data, T::class.java)
+                        onSuccess(parsed)
+                    } catch (e: Exception) {
+                        onError("Parsing error: ${e.message}")
+                    }
+                }
+                is ApiManager.ApiResult.Error -> {
+                    val errorMsg = if (result.cached) {
+                        "No network - data may be outdated: ${result.message}"
+                    } else {
+                        "API Error: ${result.message}"
+                    }
+                    onError(errorMsg)
+                }
+            }
+        }
+    }
+
 
     /**
      * Empty the API cache
