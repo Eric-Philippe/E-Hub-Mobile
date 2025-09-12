@@ -4,6 +4,7 @@ import android.content.Context
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.network.ApiManager
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -162,7 +163,8 @@ class EHubApiHelper(val context: Context) {
             when (val result = apiManager.get(context, endpoint, allowCache)) {
                 is ApiManager.ApiResult.Success -> {
                     try {
-                        val parsed = Gson().fromJson(result.data, T::class.java)
+                        val type = object : TypeToken<T>() {}.type
+                        val parsed: T = Gson().fromJson(result.data, type)
                         onSuccess(parsed)
                     } catch (e: Exception) {
                         onError("Parsing error: ${e.message}")
