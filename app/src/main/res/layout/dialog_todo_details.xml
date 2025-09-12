@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Details"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:id="@+id/etTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Title"
+        android:textColor="@color/gray_700"
+        android:textColorHint="@color/gray_400"
+        android:background="@android:color/transparent"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/etDescription"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="8dp"
+        android:gravity="top|start"
+        android:hint="Description"
+        android:textColor="@color/gray_700"
+        android:textColorHint="@color/gray_400"
+        android:background="@android:color/transparent"
+        android:overScrollMode="always"
+        android:inputType="textMultiLine"
+        android:scrollbars="vertical"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="State"
+        android:textColor="@color/gray_600"
+        android:layout_marginTop="12dp"/>
+
+    <Spinner
+        android:id="@+id/spState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tvLastUpdated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/gray_500"
+        android:textSize="12sp"
+        android:text="Last updated: --"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            android:textAllCaps="false"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:textColor="@android:color/white"/>
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/gray_300"
+            android:textColor="@color/black"/>
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/black"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+</LinearLayout>

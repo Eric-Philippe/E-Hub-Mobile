@@ -83,6 +83,17 @@
             android:imeOptions="actionDone"
             android:singleLine="true" />
 
+        <!-- Small color chip to pick root color -->
+        <View
+            android:id="@+id/btnPickColor"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_color_chip"
+            android:contentDescription="Pick color"
+            android:clickable="true"
+            android:focusable="true" />
+
         <Button
             android:id="@+id/btnCreateRoot"
             android:layout_width="wrap_content"

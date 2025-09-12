@@ -74,4 +74,16 @@ class ToDoApi(context: Context) {
             onError
         )
     }
+
+    fun deleteToDo(
+        id: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        apiHelper.deleteAsync(
+            "${Endpoints.TODO}/$id",
+            onSuccess,
+            onError
+        )
+    }
 }

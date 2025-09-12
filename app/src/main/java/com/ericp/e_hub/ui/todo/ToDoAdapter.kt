@@ -34,6 +34,8 @@ class ToDoAdapter(
         fun onAddTask(label: String)
         fun onSwitchRoot(rootId: UUID)
         fun onSelectTask(id: UUID)
+        // New: open details panel on long press
+        fun onOpenDetails(id: UUID)
     }
 
     private val items = mutableListOf<ToDoRow>()
@@ -132,6 +134,12 @@ class ToDoAdapter(
 
             // Select this task as parent when tapping the row (excluding checkbox default behavior)
             itemView.setOnClickListener { listener.onSelectTask(d.id) }
+
+            // Long-press to open details panel
+            itemView.setOnLongClickListener {
+                listener.onOpenDetails(d.id)
+                true
+            }
         }
     }
 
