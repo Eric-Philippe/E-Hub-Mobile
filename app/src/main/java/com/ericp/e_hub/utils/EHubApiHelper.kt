@@ -150,34 +150,4 @@ class EHubApiHelper(private val context: Context) {
     fun clearAllCache() {
         apiManager.clearCache(context)
     }
-
-    /**
-     * api/nonogram { "started": Date, "ended": Date }
-     */
-    fun submitNonogramAsync(
-        data: Any,
-        onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        if (!isApiConfigured()) {
-            onError("API not configured. Please set your API key in settings.")
-            return
-        }
-
-        CoroutineScope(Dispatchers.Main).launch {
-            when (val result = apiManager.post(context, Endpoints.NONOGRAM, data)) {
-                is ApiManager.ApiResult.Success -> {
-                    onSuccess(result.data)
-                }
-                is ApiManager.ApiResult.Error -> {
-                    val errorMsg = if (result.cached) {
-                        "No network - data may be outdated: ${result.message}"
-                    } else {
-                        "API Error: ${result.message}"
-                    }
-                    onError(errorMsg)
-                }
-            }
-        }
-    }
 }

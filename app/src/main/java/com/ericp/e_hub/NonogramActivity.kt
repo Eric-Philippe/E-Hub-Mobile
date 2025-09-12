@@ -18,7 +18,7 @@ import com.ericp.e_hub.nonogram.CelebrationToast
 import com.ericp.e_hub.nonogram.GameTimer
 import com.ericp.e_hub.nonogram.NonogramGame
 import com.ericp.e_hub.nonogram.NonogramStyles
-import com.ericp.e_hub.utils.EHubApiHelper
+import com.ericp.e_hub.utils.api.NonogramApi
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -43,7 +43,7 @@ class NonogramActivity : Activity() {
 
     private var cellButtons = Array(game.gridSize) { Array<Button?>(game.gridSize) { null } }
     private var rowClueViews = Array<TextView?>(game.gridSize) { null }
-    private lateinit var apiHelper: EHubApiHelper
+    private lateinit var nonogramApi: NonogramApi
     private var colClueViews = Array<TextView?>(game.gridSize) { null }
 
     // Track game session dates - moved from companion object to instance variable
@@ -72,7 +72,7 @@ class NonogramActivity : Activity() {
         initializeTimer()
         initializeVibrator()
         initializePreferences()
-        apiHelper = EHubApiHelper(this)
+        nonogramApi = NonogramApi(this)
         celebrationToast = CelebrationToast(this)
     }
 
@@ -340,7 +340,7 @@ class NonogramActivity : Activity() {
                 "ended" to endDateStr
             )
 
-            apiHelper.submitNonogramAsync(
+            nonogramApi.submitNonogramAsync(
                 data = gameData,
                 onSuccess = { _ ->
                     // Game data submitted successfully

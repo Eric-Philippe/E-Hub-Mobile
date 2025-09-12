@@ -7,8 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.edit
-import com.ericp.e_hub.utils.EHubApiHelper
-import com.ericp.e_hub.utils.Endpoints
+import com.ericp.e_hub.utils.api.NonogramApi
 
 class NonogramSettingsActivity : Activity() {
 
@@ -66,12 +65,10 @@ class NonogramSettingsActivity : Activity() {
     }
 
     private fun fetchNonogramTotal() {
-        val apiHelper = EHubApiHelper(this)
+        val nonogramApi = NonogramApi(this)
         nonogramTotalTextView.text = getString(R.string.nonogram_total_loading)
-        apiHelper.fetchDataAsync(
-            endpoint = Endpoints.NONOGRAM + "/stats/total-games",
+        nonogramApi.fetchTotalNonogramsAsync(
             onSuccess = { data ->
-                // Data is already the number of completed nonograms
                 val total = data.toIntOrNull()
                 if (total != null) {
                     nonogramTotalTextView.text = getString(R.string.nonogram_total_completed, total)
