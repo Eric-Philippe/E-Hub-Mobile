@@ -63,7 +63,8 @@
 
         <activity
             android:name=".NotesActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 

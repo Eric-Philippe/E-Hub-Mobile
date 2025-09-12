@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.adapters.NoteAdapter
 import com.ericp.e_hub.config.ApiConfig
 import com.ericp.e_hub.dto.NoteDto
+import com.ericp.e_hub.dto.NoteStatus
 import com.ericp.e_hub.utils.EHubApiHelper
 import com.ericp.e_hub.utils.Endpoints
 import com.google.gson.Gson
@@ -25,27 +26,28 @@ class NotesActivity : Activity() {
     private lateinit var backButton: Button
     private lateinit var emptyStateLayout: View
     private lateinit var notesRecyclerView: RecyclerView
-    private lateinit var saveButton: Button
-
     // Data and helpers
     private lateinit var noteAdapter: NoteAdapter
     private val notes = mutableListOf<NoteDto>()
     private lateinit var apiHelper: EHubApiHelper
     private lateinit var apiConfig: ApiConfig
-    private var hasUnsavedChanges: Boolean = false
     private var originalNotes: List<NoteDto> = emptyList()
+    private val deletedNotes = mutableListOf<NoteDto>()
+    private var autoSaveRunnable: Runnable? = null
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
     override fun onCreate(saveInstanceState: Bundle?) {
         super.onCreate(saveInstanceState)
         setContentView(R.layout.activity_notes)
+
+        apiConfig = ApiConfig(this)
+        apiHelper = EHubApiHelper(this)
 
         initializeComponents()
         setupRecyclerView()
         setupListeners()
         setupSwipeToDelete()
 
-        apiConfig = ApiConfig(this)
-        apiHelper = EHubApiHelper(this)
         fetchNotes()
     }
 
@@ -53,12 +55,6 @@ class NotesActivity : Activity() {
         backButton = findViewById(R.id.backButton)
         notesRecyclerView = findViewById(R.id.notesRecyclerView)
         emptyStateLayout = findViewById(R.id.emptyStateLayout)
-        saveButton = findViewById(R.id.saveButton)
-    }
-
-    private fun setUnsavedChanges(changed: Boolean) {
-        hasUnsavedChanges = changed
-        saveButton.visibility = if (changed) View.VISIBLE else View.GONE
     }
 
     private fun updateEmptyState() {
@@ -72,22 +68,35 @@ class NotesActivity : Activity() {
     }
 
     private fun setupRecyclerView() {
-        // Ensure at least one empty note exists
-        if (notes.isEmpty() || notes.last().content.isNotEmpty()) {
-            notes.add(NoteDto(content = ""))
+        // Ensure all notes have the key set
+        notes.forEachIndexed { i, note ->
+            if (note.key != apiConfig.getSecretKey()) {
+                notes[i] = note.copy(key = apiConfig.getSecretKey())
+            }
         }
+
         noteAdapter = NoteAdapter(
             notes,
-            onNoteChanged = { position, newContent ->
-                notes[position] = notes[position].copy(content = newContent)
-                setUnsavedChanges(true)
+            apiConfig.getSecretKey() ?: "",
+            { position: Int, newContent: String ->
+                notes[position] = notes[position].copy(content = newContent, key = apiConfig.getSecretKey() ?: "")
+                scheduleAutoSave()
             },
-            onAddEmptyNote = {
-                // Only add if last note is not empty
-                if (notes.isEmpty() || notes.last().content.isNotEmpty()) {
-                    notes.add(NoteDto(content = ""))
-                    noteAdapter.notifyItemInserted(notes.size - 1)
-                    setUnsavedChanges(true)
+            { idx: Int ->
+                val note = notes.getOrNull(idx)
+                if (note == null) {
+                    ""
+                } else {
+                    if (!note.id.isNullOrBlank()) {
+                        originalNotes.find { it.id == note.id }?.content ?: ""
+                    } else {
+                        ""
+                    }
+                }
+            },
+            { position: Int ->
+                notesRecyclerView.post {
+                    notesRecyclerView.smoothScrollToPosition(position)
                 }
             }
         )
@@ -97,7 +106,6 @@ class NotesActivity : Activity() {
 
     private fun setupListeners() {
         backButton.setOnClickListener { finish() }
-        saveButton.setOnClickListener { onSave() }
     }
 
     private fun setupSwipeToDelete() {
@@ -106,15 +114,24 @@ class NotesActivity : Activity() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.bindingAdapterPosition
                 if (position >= 0 && position < notes.size) {
+                    val note = notes[position]
+
+                    // Always remove from the visible list immediately
                     notes.removeAt(position)
+
+                    // If it's a persisted note, mark for deletion on server
+                    if (note.id != null && note.status != NoteStatus.DELETED) {
+                        deletedNotes.add(note.copy(status = NoteStatus.DELETED, key = apiConfig.getSecretKey()))
+                    }
+
                     noteAdapter.notifyItemRemoved(position)
                     updateEmptyState()
-                    setUnsavedChanges(true)
+                    scheduleAutoSave()
                     Toast.makeText(this@NotesActivity, "Note deleted", Toast.LENGTH_SHORT).show()
                 }
             }
             override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
-                return 0.5f
+                return 0.6f
             }
             override fun onChildDraw(
                 canvas: Canvas,
@@ -162,6 +179,82 @@ class NotesActivity : Activity() {
         itemTouchHelper.attachToRecyclerView(notesRecyclerView)
     }
 
+    private fun scheduleAutoSave() {
+        autoSaveRunnable?.let { handler.removeCallbacks(it) }
+        autoSaveRunnable = Runnable {
+            autoSaveNotes()
+        }
+        handler.postDelayed(autoSaveRunnable!!, 3500L)
+    }
+
+    private fun autoSaveNotes() {
+        val modifiedNotes = noteAdapter.getModifiedNotes() + deletedNotes
+        val notesToSave = modifiedNotes.filter {
+            !(it.status == NoteStatus.EMPTY || (it.content.isEmpty() && it.id == null))
+        }
+        if (notesToSave.isEmpty()) return
+        for (note in notesToSave) {
+            when (note.status) {
+                NoteStatus.CREATED -> {
+                    createNote(note)
+                }
+                NoteStatus.EDITED -> {
+                    editNote(note)
+                }
+                NoteStatus.DELETED -> {
+                    deleteNote(note)
+                }
+                else -> {}
+            }
+        }
+        deletedNotes.clear()
+        Toast.makeText(this, "Notes auto-saved", Toast.LENGTH_SHORT).show()
+        // Auto-add blank note at the top after auto-save
+        if (notes.isEmpty() || notes[0].content.isNotEmpty()) {
+            notes.add(0, NoteDto(content = "", status = NoteStatus.CREATED, key = apiConfig.getSecretKey()))
+            noteAdapter.notifyItemInserted(0)
+        }
+        updateEmptyState()
+    }
+
+    private fun createNote(note: NoteDto) {
+        apiHelper.postDataAsync(
+            endpoint = Endpoints.NOTES + "/create",
+            data = note,
+            onSuccess = {
+                val idx = notes.indexOfFirst { it === note }
+                if (idx != -1) {
+                    notes[idx] = notes[idx].copy(status = NoteStatus.UNTOUCHED)
+                    noteAdapter.notifyItemChanged(idx)
+                }
+            },
+            onError = {}
+        )
+    }
+
+    private fun editNote(note: NoteDto) {
+        apiHelper.putAsync(
+            endpoint = Endpoints.NOTES + "/update/" + note.id,
+            data = note,
+            onSuccess = {
+                val idx = notes.indexOfFirst { it === note }
+                if (idx != -1) {
+                    notes[idx] = notes[idx].copy(status = NoteStatus.UNTOUCHED)
+                    noteAdapter.notifyItemChanged(idx)
+                }
+            },
+            onError = {}
+        )
+    }
+
+    private fun deleteNote(note: NoteDto) {
+        apiHelper.deleteAsync(
+            endpoint = Endpoints.NOTES + "/delete/" + note.id,
+            onSuccess = {},
+            onError = {}
+        )
+    }
+
     private fun fetchNotes() {
         apiHelper.fetchDataAsync(
             endpoint = Endpoints.NOTES + "/all/" + apiConfig.getSecretKey(),
@@ -171,22 +264,18 @@ class NotesActivity : Activity() {
                     val notesType = object : TypeToken<List<NoteDto>>() {}.type
                     val fetchedNotes: List<NoteDto> = gson.fromJson(response, notesType)
                     this.notes.clear()
-                    this.notes.addAll(fetchedNotes)
-                    originalNotes = fetchedNotes.map { it.copy() } // Save original for change tracking
-                    // Always ensure an empty note at the end
-                    if (this.notes.isEmpty() || this.notes.last().content.isNotEmpty()) {
-                        this.notes.add(NoteDto(content = ""))
-                    }
-                    runOnUiThread {
-                        noteAdapter.notifyDataSetChanged()
-                        updateEmptyState()
-                        setUnsavedChanges(false)
-                    }
+                    // Sort notes so newest is first (top)
+                    val sortedNotes = fetchedNotes.sortedByDescending { it.created ?: "" }
+                    this.notes.addAll(sortedNotes.map { it.copy(key = apiConfig.getSecretKey()) })
+                    // Add blank note at the top
+                    this.notes.add(0, NoteDto(content = "", status = NoteStatus.CREATED, key = apiConfig.getSecretKey()))
+                    originalNotes = fetchedNotes.map { it.copy(key = apiConfig.getSecretKey()) }
+                    noteAdapter.notifyDataSetChanged()
+                    updateEmptyState()
                 } catch (e: Exception) {
                     runOnUiThread {
                         Toast.makeText(this, "Failed to parse notes: ${e.message}", Toast.LENGTH_LONG).show()
                         updateEmptyState()
-                        setUnsavedChanges(false)
                     }
                 }
             },
@@ -194,15 +283,8 @@ class NotesActivity : Activity() {
                 runOnUiThread {
                     Toast.makeText(this, "Error fetching notes: $error", Toast.LENGTH_LONG).show()
                     updateEmptyState()
-                    setUnsavedChanges(false)
                 }
             }
         )
-    }
-
-    private fun onSave() {
-        // To be implemented: save notes to backend or storage
-        setUnsavedChanges(false)
-        Toast.makeText(this, "Notes saved (virtual)", Toast.LENGTH_SHORT).show()
     }
 }

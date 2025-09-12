@@ -37,7 +37,7 @@
                 android:id="@+id/titleTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/to_buy_title"
+                android:text="@string/notes_title"
                 android:textSize="24sp"
                 android:textColor="#1A1A1A"
                 android:fontFamily="sans-serif-light"
@@ -48,19 +48,6 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-        <!-- Save Button, initially hidden -->
-        <Button
-            android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:text="@string/save"
-            android:background="@drawable/btn_outline"
-            android:textColor="#2196F3"
-            android:textSize="14sp"
-            android:paddingHorizontal="16dp"
-            android:fontFamily="sans-serif-medium"
-            android:minWidth="0dp"
-            android:visibility="gone" />
     </LinearLayout>
 
     <!-- Main Content Area -->
@@ -112,7 +99,6 @@
 
             </LinearLayout>
 
-            <!-- RecyclerView for category accordion -->
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/notesRecyclerView"
                     android:layout_width="match_parent"
