@@ -1,5 +1,6 @@
 package com.ericp.e_hub.ui.todo
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.GradientDrawable
@@ -11,7 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.widget.CompoundButtonCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.R
 import com.ericp.e_hub.dto.State
@@ -20,7 +23,7 @@ import java.util.UUID
 
 sealed class ToDoRow {
     data class Header(val rootId: UUID, val title: String, val subtitle: String) : ToDoRow()
-    data class Task(val dto: ToDoDto, val level: Int, val selected: Boolean) : ToDoRow()
+    data class Task(val dto: ToDoDto, val level: Int, val selected: Boolean, val hasChildren: Boolean, val isCollapsed: Boolean) : ToDoRow()
     data object Input : ToDoRow()
     data class Nav(val rootId: UUID, val title: String, val shadeIndex: Int) : ToDoRow()
 }
@@ -36,6 +39,7 @@ class ToDoAdapter(
         fun onSelectTask(id: UUID)
         fun onOpenDetails(id: UUID)
         fun onSwitchRoot(rootId: UUID, fromView: View?)
+        fun onToggleExpand(id: UUID)
     }
 
     private val items = mutableListOf<ToDoRow>()
@@ -88,7 +92,9 @@ class ToDoAdapter(
     }
 
     private inner class TaskVH(view: View) : RecyclerView.ViewHolder(view) {
+        private val expand: ImageView = view.findViewById(R.id.ivExpand)
         private val cb: CheckBox = view.findViewById(R.id.cb)
+        private val dash: View = view.findViewById(R.id.vDash)
         private val tv: TextView = view.findViewById(R.id.tv)
         fun bind(row: ToDoRow.Task) {
             val d = row.dto
@@ -100,9 +106,30 @@ class ToDoAdapter(
             (itemView as ViewGroup).setPadding(px, itemView.paddingTop, itemView.paddingRight, itemView.paddingBottom)
 
             tv.text = d.label
+
+            // Tri-state rendering
+            val isInProgress = d.state == State.IN_PROGRESS
             val isDone = d.state == State.DONE
+
+            // Checkbox checked only when DONE
             cb.setOnCheckedChangeListener(null)
             cb.isChecked = isDone
+
+            // Tint checkbox when DONE to task color, else default
+            try {
+                val tint = if (isDone) {
+                    val base = if (d.color.isNullOrBlank()) "#000000" else d.color
+                    ColorStateList.valueOf(Color.parseColor(base))
+                } else {
+                    ColorStateList.valueOf(itemView.resources.getColor(R.color.black, null))
+                }
+                CompoundButtonCompat.setButtonTintList(cb, tint)
+            } catch (_: Exception) {
+                // ignore tint errors
+            }
+
+            // Show dash overlay for IN_PROGRESS
+            dash.visibility = if (isInProgress) View.VISIBLE else View.GONE
 
             // Strike-through and text color
             tv.paintFlags = if (isDone) tv.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG else tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
@@ -114,7 +141,6 @@ class ToDoAdapter(
                     cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6f, itemView.resources.displayMetrics)
                     try {
                         val c = if (d.color.isNullOrBlank()) "#FFE0E0E0" else d.color
-                        // apply with low alpha for a soft erase effect
                         val parsed = Color.parseColor(c)
                         val withAlpha = Color.argb(48, Color.red(parsed), Color.green(parsed), Color.blue(parsed))
                         setColor(withAlpha)
@@ -131,8 +157,14 @@ class ToDoAdapter(
             val selColor = itemView.resources.getColor(R.color.gray_100, null)
             itemView.setBackgroundColor(if (row.selected) selColor else Color.TRANSPARENT)
 
-            cb.setOnCheckedChangeListener { _, checked ->
-                listener.onToggleTask(d.id, if (checked) State.DONE else State.TODO)
+            // Cycle states on checkbox click: TODO -> IN_PROGRESS -> DONE -> TODO
+            cb.setOnClickListener {
+                val next = when (d.state) {
+                    State.TODO -> State.IN_PROGRESS
+                    State.IN_PROGRESS -> State.DONE
+                    State.DONE -> State.TODO
+                }
+                listener.onToggleTask(d.id, next)
             }
 
             // Select this task as parent when tapping the row (excluding checkbox default behavior)
@@ -142,6 +174,16 @@ class ToDoAdapter(
             itemView.setOnLongClickListener {
                 listener.onOpenDetails(d.id)
                 true
+            }
+
+            // Expand/collapse arrow visible only when level >= 2 and has children
+            if (row.level >= 1 && row.hasChildren) {
+                expand.visibility = View.VISIBLE
+                expand.rotation = if (row.isCollapsed) -90f else 0f // pointing right when collapsed
+                expand.setOnClickListener { listener.onToggleExpand(d.id) }
+            } else {
+                expand.visibility = View.GONE
+                expand.setOnClickListener(null)
             }
         }
     }

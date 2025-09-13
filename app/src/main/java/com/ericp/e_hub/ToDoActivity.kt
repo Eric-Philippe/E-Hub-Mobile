@@ -2,7 +2,6 @@ package com.ericp.e_hub
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.RectF
@@ -16,7 +15,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.GridLayout
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
@@ -43,8 +41,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     private lateinit var api: ToDoApi
 
     // Header views
-    private lateinit var btnBack: ImageButton
-    private lateinit var tvTitle: TextView
+    private lateinit var btnBack: Button
 
     // Bottom form views
     private lateinit var etRootLabel: EditText
@@ -60,9 +57,13 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     private val overrideLabels = mutableMapOf<UUID, String>()
     private val overrideDescriptions = mutableMapOf<UUID, String?>()
     private val overrideModified = mutableMapOf<UUID, String>()
+    private val collapsed = mutableSetOf<UUID>() // collapsed items (effective for subtasks)
 
     // Selected color for new root tasks
     private var selectedRootColor: String? = null
+
+    // Collapse seeded once on first successful load
+    private var initializedCollapse: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,8 +73,6 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
 
         // Bind header
         btnBack = findViewById(R.id.btnBack)
-        tvTitle = findViewById(R.id.tvActivityTitle)
-        tvTitle.text = "To-Do"
         btnBack.setOnClickListener { finish() }
 
         // Bind list
@@ -102,8 +101,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean = false
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val pos = viewHolder.bindingAdapterPosition
-                val row = adapter.getItem(pos)
-                val rootId: UUID? = when (row) {
+                val rootId: UUID? = when (val row = adapter.getItem(pos)) {
                     is ToDoRow.Header -> row.rootId
                     is ToDoRow.Nav -> row.rootId
                     else -> null
@@ -198,15 +196,23 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 }
                 if (selectedRootId == null) selectedRootId = roots.first().id
                 if (selectedParentId == null) selectedParentId = selectedRootId
+
+                // Seed initial collapsed state so subtasks (depth >= 1) are closed under their parent
+                if (!initializedCollapse) {
+                    collapsed.clear()
+                    val selRoot = roots.find { it.id == selectedRootId } ?: roots.first()
+                    collapsed.addAll(collectIdsWithChildren(selRoot.children, startDepth = 0, minDepthToCollapse = 1))
+                    initializedCollapse = true
+                }
+
                 render()
             },
             onError = { msg ->
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                adapter.submitItems(emptyList())
+                // keep UI as-is on error
             }
         )
     }
-
     private fun refreshFromServer() {
         api.fetchToDos(
             onSuccess = { list ->
@@ -273,9 +279,12 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         list.forEach { d ->
             val withState = applyOverrides(d)
             val isSelected = selectedParentId == d.id
-            out += ToDoRow.Task(withState, level, isSelected)
             val kids = (d.children) + (newTasksByRoot[d.id] ?: emptyList())
-            if (kids.isNotEmpty()) out += flatten(kids, level + 1)
+            val hasChildren = kids.isNotEmpty()
+            val isCollapsed = collapsed.contains(d.id)
+            out += ToDoRow.Task(withState, level, isSelected, hasChildren, isCollapsed)
+            val shouldShowKids = hasChildren && !(level >= 1 && isCollapsed)
+            if (shouldShowKids) out += flatten(kids, level + 1)
         }
         return out
     }
@@ -356,6 +365,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             recycler.animate().alpha(0f).setDuration(80).withEndAction {
                 selectedRootId = rootId
                 selectedParentId = rootId
+                collapsed.clear()
                 render()
                 recycler.alpha = 0f
                 recycler.animate().alpha(1f).setDuration(140).start()
@@ -396,6 +406,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 content.removeView(iv)
                 selectedRootId = rootId
                 selectedParentId = rootId
+                collapsed.clear()
                 render()
                 recycler.alpha = 0.15f
                 recycler.animate().alpha(1f).setDuration(180).start()
@@ -430,7 +441,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         spState.setSelection(states.indexOf(dto.state).coerceAtLeast(0))
 
         val last = overrideModified[id] ?: dto.modified ?: dto.created
-        tvUpdated.text = "Last updated: ${formatDisplayTime(last)}"
+        tvUpdated.text = getString(R.string.last_updated, formatDisplayTime(last))
 
         val dialog = AlertDialog.Builder(this).setView(v).create()
 
@@ -450,7 +461,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             render()
 
             val req = ToDoRequest(
-                label = if (newLabel.isNotEmpty()) newLabel else prevLabel,
+                label = newLabel.ifEmpty { prevLabel },
                 state = newState,
                 color = dto.color,
                 description = newDesc.ifEmpty { null },
@@ -500,6 +511,11 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         }
 
         dialog.show()
+    }
+
+    override fun onToggleExpand(id: UUID) {
+        if (!collapsed.add(id)) collapsed.remove(id)
+        render()
     }
 
     private var colorDialog: AlertDialog? = null
@@ -577,4 +593,16 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val dt = LocalDateTime.parse(isoOrOther)
         DateTimeFormatter.ofPattern("MMM d, yyyy  —  h:mma").format(dt)
     } catch (_: Exception) { isoOrOther }
+    // Helper: collect IDs of nodes with children, collapsing only from a minimum depth
+    private fun collectIdsWithChildren(nodes: List<ToDoDto>, startDepth: Int, minDepthToCollapse: Int): Set<UUID> {
+        val out = mutableSetOf<UUID>()
+        fun walk(list: List<ToDoDto>, depth: Int) {
+            list.forEach { n ->
+                if (n.children.isNotEmpty() && depth >= minDepthToCollapse) out += n.id
+                if (n.children.isNotEmpty()) walk(n.children, depth + 1)
+            }
+        }
+        walk(nodes, startDepth)
+        return out
+    }
 }
