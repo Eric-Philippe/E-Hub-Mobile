@@ -210,4 +210,14 @@
     <string name="notes_title">Notes</string>
     <string name="content">Content</string>
     <string name="last_edited">Last edited: %1$s</string>
+
+    <!-- ToDo Activity Strings -->
+    <string name="todo_title">To-Do</string>
+    <string name="add_new_list_hint">Add a new list...</string>
+    <string name="pick_color">Pick color</string>
+    <string name="create">Create</string>
+    <string name="last_updated">Last updated: %1$s</string>
+
+    <!-- Watch Settings Strings -->
+    <string name="watch_settings_title">Watch Settings</string>
 </resources>
