@@ -2,15 +2,27 @@ package com.ericp.e_hub
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.GridLayout
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.dto.State
@@ -22,12 +34,8 @@ import com.ericp.e_hub.utils.api.ToDoApi
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import android.view.View
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.widget.LinearLayout
-import android.view.ViewGroup
-import android.widget.GridLayout
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.toColorInt
 
 class ToDoActivity: Activity(), ToDoAdapter.Listener {
     private lateinit var recycler: RecyclerView
@@ -46,10 +54,9 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     // Data
     private var roots: List<ToDoDto> = emptyList()
     private var selectedRootId: UUID? = null
-    private var selectedParentId: UUID? = null // currently selected task (or root) to be used as parent for new tasks
+    private var selectedParentId: UUID? = null // task selected as parent when adding
     private val overrideStates = mutableMapOf<UUID, State>()
     private val newTasksByRoot = mutableMapOf<UUID, MutableList<ToDoDto>>()
-    // New: local overrides for editing title/description/modified
     private val overrideLabels = mutableMapOf<UUID, String>()
     private val overrideDescriptions = mutableMapOf<UUID, String?>()
     private val overrideModified = mutableMapOf<UUID, String>()
@@ -66,7 +73,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         // Bind header
         btnBack = findViewById(R.id.btnBack)
         tvTitle = findViewById(R.id.tvActivityTitle)
-        tvTitle.text = getString(R.string.app_name).let { "To-Do" } // explicit title as requested
+        tvTitle.text = "To-Do"
         btnBack.setOnClickListener { finish() }
 
         // Bind list
@@ -74,6 +81,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         recycler.layoutManager = LinearLayoutManager(this)
         adapter = ToDoAdapter(this)
         recycler.adapter = adapter
+        attachSwipeToDelete()
 
         // Bind bottom form
         etRootLabel = findViewById(R.id.etRootLabel)
@@ -81,14 +89,56 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         btnPickColor = findViewById(R.id.btnPickColor)
         btnCreateRoot.setOnClickListener { submitNewRoot() }
         etRootLabel.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                submitNewRoot(); true
-            } else false
+            if (actionId == EditorInfo.IME_ACTION_DONE) { submitNewRoot(); true } else false
         }
         btnPickColor.setOnClickListener { showColorPicker() }
         updateColorChip()
 
         loadData()
+    }
+
+    private fun attachSwipeToDelete() {
+        val callback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean = false
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val pos = viewHolder.bindingAdapterPosition
+                val row = adapter.getItem(pos)
+                val rootId: UUID? = when (row) {
+                    is ToDoRow.Header -> row.rootId
+                    is ToDoRow.Nav -> row.rootId
+                    else -> null
+                }
+                adapter.notifyItemChanged(pos)
+                if (rootId == null) return
+                AlertDialog.Builder(this@ToDoActivity)
+                    .setTitle("Delete list")
+                    .setMessage("Delete this list and all of its tasks?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        api.deleteToDo(
+                            id = rootId.toString(),
+                            onSuccess = {
+                                if (selectedRootId == rootId) {
+                                    selectedRootId = null
+                                    selectedParentId = null
+                                }
+                                Toast.makeText(this@ToDoActivity, "Deleted", Toast.LENGTH_SHORT).show()
+                                refreshFromServer()
+                            },
+                            onError = { msg -> Toast.makeText(this@ToDoActivity, msg, Toast.LENGTH_SHORT).show() }
+                        )
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+            override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                val row = adapter.getItem(viewHolder.bindingAdapterPosition)
+                return when (row) {
+                    is ToDoRow.Header, is ToDoRow.Nav -> super.getSwipeDirs(recyclerView, viewHolder)
+                    else -> 0
+                }
+            }
+        }
+        ItemTouchHelper(callback).attachToRecyclerView(recycler)
     }
 
     private fun submitNewRoot() {
@@ -103,7 +153,6 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     }
 
     private fun createRootLocallyAndSync(label: String) {
-        // Optimistic local add
         val now = LocalDateTime.now().toString()
         val tempRoot = ToDoDto(
             id = UUID.randomUUID(),
@@ -123,16 +172,11 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         render()
         recycler.post { recycler.scrollToPosition(0) }
 
-        // API create
         val req = ToDoRequest(label = label, state = State.TODO, color = selectedRootColor, parentId = null)
         api.createToDo(
             data = req,
-            onSuccess = {
-                // Refresh from server to replace temp item with persisted one
-                refreshFromServer()
-            },
+            onSuccess = { refreshFromServer() },
             onError = { msg ->
-                // Remove optimistic root and render
                 roots = roots.filter { it.id != tempRoot.id }
                 if (selectedRootId == tempRoot.id) {
                     selectedRootId = roots.firstOrNull()?.id
@@ -145,10 +189,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     }
 
     private fun loadData() {
-        // Fetch tasks and render
         api.fetchToDos(
             onSuccess = { list ->
-                // The API may already return hierarchical trees via children
                 roots = list.filter { it.parentId == null }
                 if (roots.isEmpty()) {
                     adapter.submitItems(emptyList())
@@ -158,16 +200,14 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 if (selectedParentId == null) selectedParentId = selectedRootId
                 render()
             },
-            onError = {
-                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-                // Still render empty UI with nav bars if any known roots (none on error without cache)
+            onError = { msg ->
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 adapter.submitItems(emptyList())
             }
         )
     }
 
     private fun refreshFromServer() {
-        // Clear local temp tasks on a full refresh and keep selection when possible
         api.fetchToDos(
             onSuccess = { list ->
                 val prevRoot = selectedRootId
@@ -180,10 +220,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                     adapter.submitItems(emptyList())
                     return@fetchToDos
                 }
-                // Maintain selection if still present
                 selectedRootId = roots.find { it.id == prevRoot }?.id ?: roots.first().id
                 selectedParentId = prevSel?.let { sel ->
-                    // verify exists in refreshed tree
                     fun existsIn(listIn: List<ToDoDto>): Boolean {
                         listIn.forEach { d ->
                             if (d.id == sel) return true
@@ -195,9 +233,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 }
                 render()
             },
-            onError = { msg ->
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            }
+            onError = { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() }
         )
     }
 
@@ -209,19 +245,12 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val rows = mutableListOf<ToDoRow>()
         val title = selectedRoot.label.uppercase()
         val subtitle = DateTimeFormatter.ofPattern("MMMM, dd yyyy  —  h:mma").format(LocalDateTime.now())
-        rows += ToDoRow.Header(title, subtitle)
+        rows += ToDoRow.Header(selectedRoot.id, title, subtitle)
 
-        // Build task rows from selected root's children
         val children = (selectedRoot.children) + (newTasksByRoot[selectedRoot.id] ?: emptyList())
         rows += flatten(children, 0)
-
-        // Input row
         rows += ToDoRow.Input
-
-        // Navigation bars for other roots
-        otherRoots.forEachIndexed { idx, r ->
-            rows += ToDoRow.Nav(r.id, r.label.uppercase(), idx)
-        }
+        otherRoots.forEachIndexed { idx, r -> rows += ToDoRow.Nav(r.id, r.label.uppercase(), idx) }
 
         adapter.submitItems(rows)
     }
@@ -246,9 +275,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             val isSelected = selectedParentId == d.id
             out += ToDoRow.Task(withState, level, isSelected)
             val kids = (d.children) + (newTasksByRoot[d.id] ?: emptyList())
-            if (kids.isNotEmpty()) {
-                out += flatten(kids, level + 1)
-            }
+            if (kids.isNotEmpty()) out += flatten(kids, level + 1)
         }
         return out
     }
@@ -264,40 +291,22 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         }
         val inRoots = walk(roots)
         if (inRoots != null) return inRoots
-        newTasksByRoot.values.forEach { list ->
-            list.firstOrNull { it.id == id }?.let { return applyOverrides(it) }
-        }
+        newTasksByRoot.values.forEach { list -> list.firstOrNull { it.id == id }?.let { return applyOverrides(it) } }
         return null
     }
 
     // Adapter callbacks
     override fun onToggleTask(id: UUID, newState: State) {
-        // Capture previous for revert if needed
         val prevState = findById(id)?.state
         overrideStates[id] = newState
         overrideModified[id] = LocalDateTime.now().toString()
         render()
-
-        // Sync with API
         api.changeToDoState(
             id = id.toString(),
             newState = newState,
-            onSuccess = {
-                // Clear overrides and refresh to reflect canonical server data
-                clearOverridesFor(id)
-                refreshFromServer()
-            },
+            onSuccess = { clearOverridesFor(id); refreshFromServer() },
             onError = { msg ->
-                // Revert UI
-                if (prevState != null) {
-                    if (prevState == newState) {
-                        // no-op
-                    } else {
-                        overrideStates[id] = prevState
-                    }
-                } else {
-                    overrideStates.remove(id)
-                }
+                if (prevState != null && prevState != newState) overrideStates[id] = prevState else overrideStates.remove(id)
                 render()
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -328,12 +337,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val req = ToDoRequest(label = label, state = State.TODO, parentId = parentId)
         api.createToDo(
             data = req,
-            onSuccess = {
-                // Replace temp with server data via full refresh
-                refreshFromServer()
-            },
+            onSuccess = { refreshFromServer() },
             onError = { msg ->
-                // Remove temp
                 newTasksByRoot[parentId]?.removeAll { it.id == tempId }
                 render()
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -342,12 +347,60 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     }
 
     override fun onSwitchRoot(rootId: UUID) {
-        if (selectedRootId != rootId) {
-            selectedRootId = rootId
-            selectedParentId = rootId // default to root as parent when switching
-            render()
-            recycler.post { recycler.scrollToPosition(0) }
+        onSwitchRoot(rootId, null)
+    }
+
+    override fun onSwitchRoot(rootId: UUID, fromView: View?) {
+        if (selectedRootId == rootId) return
+        if (fromView == null) {
+            recycler.animate().alpha(0f).setDuration(80).withEndAction {
+                selectedRootId = rootId
+                selectedParentId = rootId
+                render()
+                recycler.alpha = 0f
+                recycler.animate().alpha(1f).setDuration(140).start()
+            }.start()
+            return
         }
+        val content = findViewById<FrameLayout>(android.R.id.content) ?: return
+        val startRect = rectIn(content, fromView)
+        val headerView = recycler.findViewHolderForAdapterPosition(0)?.itemView
+        val endRect = if (headerView != null) rectIn(content, headerView) else run {
+            val rvRect = rectIn(content, recycler)
+            val w = startRect.width()
+            val h = startRect.height()
+            RectF(rvRect.left + dp(16f), rvRect.top + dp(8f), rvRect.left + dp(16f) + w, rvRect.top + dp(8f) + h)
+        }
+        if (startRect.width() <= 0 || startRect.height() <= 0) { onSwitchRoot(rootId, null); return }
+        val bmp = createBitmap(fromView.width.coerceAtLeast(1), fromView.height.coerceAtLeast(1))
+        val canvas = Canvas(bmp)
+        fromView.draw(canvas)
+        val iv = ImageView(this).apply {
+            scaleType = ImageView.ScaleType.FIT_XY
+            setImageBitmap(bmp)
+            layoutParams = FrameLayout.LayoutParams(startRect.width().toInt(), startRect.height().toInt())
+            x = startRect.left
+            y = startRect.top
+        }
+        content.addView(iv)
+        recycler.animate().alpha(0.15f).setDuration(120).start()
+        val sx = (endRect.width() / startRect.width()).coerceAtLeast(0.1f)
+        val sy = (endRect.height() / startRect.height()).coerceAtLeast(0.1f)
+        iv.animate()
+            .x(endRect.left)
+            .y(endRect.top)
+            .scaleX(sx)
+            .scaleY(sy)
+            .setDuration(260)
+            .withEndAction {
+                content.removeView(iv)
+                selectedRootId = rootId
+                selectedParentId = rootId
+                render()
+                recycler.alpha = 0.15f
+                recycler.animate().alpha(1f).setDuration(180).start()
+            }
+            .start()
     }
 
     override fun onSelectTask(id: UUID) {
@@ -366,49 +419,40 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val btnCancel = v.findViewById<Button>(R.id.btnCancel)
         val btnDelete = v.findViewById<Button>(R.id.btnDelete)
 
-        // Populate
         etTitle.setText(dto.label)
         etDesc.setText(dto.description ?: "")
-        // Spinner adapter and selection
         val items = listOf("To Do", "In Progress", "Done")
         val states = listOf(State.TODO, State.IN_PROGRESS, State.DONE)
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, items).apply {
+        val spinnerAdapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, items).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
-        spState.adapter = adapter
+        spState.adapter = spinnerAdapter
         spState.setSelection(states.indexOf(dto.state).coerceAtLeast(0))
 
         val last = overrideModified[id] ?: dto.modified ?: dto.created
         tvUpdated.text = "Last updated: ${formatDisplayTime(last)}"
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(v)
-            .create()
+        val dialog = AlertDialog.Builder(this).setView(v).create()
 
         btnSave.setOnClickListener {
             val newLabel = etTitle.text?.toString()?.trim().orEmpty()
             val newDesc = etDesc.text?.toString()?.trim().orEmpty()
             val newState = states.getOrNull(spState.selectedItemPosition) ?: dto.state
 
-            // Capture previous values for possible revert
             val prevLabel = dto.label
             val prevDesc = dto.description
             val prevState = dto.state
 
-            // Optimistic overrides
-            if (newLabel.isNotEmpty() && newLabel != dto.label) {
-                overrideLabels[id] = newLabel
-            }
+            if (newLabel.isNotEmpty() && newLabel != dto.label) overrideLabels[id] = newLabel
             overrideDescriptions[id] = newDesc.ifEmpty { null }
             overrideStates[id] = newState
             overrideModified[id] = LocalDateTime.now().toString()
-
             render()
 
-            // Sync with API
             val req = ToDoRequest(
                 label = if (newLabel.isNotEmpty()) newLabel else prevLabel,
                 state = newState,
+                color = dto.color,
                 description = newDesc.ifEmpty { null },
                 parentId = dto.parentId
             )
@@ -416,18 +460,15 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 id = id.toString(),
                 data = req,
                 onSuccess = {
-                    // Clear overrides so server truth shows
                     clearOverridesFor(id)
                     refreshFromServer()
                     dialog.dismiss()
                 },
                 onError = { msg ->
-                    // Revert optimistic changes
                     if (newLabel != prevLabel) overrideLabels[id] = prevLabel else overrideLabels.remove(id)
                     if ((prevDesc ?: "") != newDesc) overrideDescriptions[id] = prevDesc else overrideDescriptions.remove(id)
                     if (prevState != newState) overrideStates[id] = prevState else overrideStates.remove(id)
                     overrideModified.remove(id)
-
                     render()
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
@@ -445,16 +486,13 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                         id = id.toString(),
                         onSuccess = {
                             clearOverridesFor(id)
-                            // Adjust selections if needed
                             if (selectedParentId == id) selectedParentId = dto.parentId
                             if (selectedRootId == id) selectedRootId = null
                             Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show()
                             dialog.dismiss()
                             refreshFromServer()
                         },
-                        onError = { msg ->
-                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                        }
+                        onError = { msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show() }
                     )
                 }
                 .setNegativeButton("Cancel", null)
@@ -463,6 +501,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
 
         dialog.show()
     }
+
+    private var colorDialog: AlertDialog? = null
 
     private fun showColorPicker() {
         val colors = listOf(
@@ -474,23 +514,15 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 24, 24, 24)
         }
-        val grid = GridLayout(this).apply {
-            columnCount = 6
-        }
+        val grid = GridLayout(this).apply { columnCount = 6 }
         val sizePx = (28 * resources.displayMetrics.density).toInt()
         val marginPx = (8 * resources.displayMetrics.density).toInt()
         colors.forEach { hex ->
             val v = View(this).apply {
-                layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).apply {
-                    setMargins(marginPx, marginPx, marginPx, marginPx)
-                }
+                layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).apply { setMargins(marginPx, marginPx, marginPx, marginPx) }
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
-                    try {
-                        setColor(Color.parseColor(hex))
-                    } catch (_: Exception) {
-                        setColor(Color.LTGRAY)
-                    }
+                    try { setColor(hex.toColorInt()) } catch (_: Exception) { setColor(Color.LTGRAY) }
                     setStroke((1 * resources.displayMetrics.density).toInt(), Color.DKGRAY)
                 }
                 isClickable = true
@@ -504,27 +536,20 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             grid.addView(v)
         }
         container.addView(grid)
-        colorDialog = AlertDialog.Builder(this)
-            .setTitle("Pick a color")
-            .setView(container)
-            .create()
+        colorDialog = AlertDialog.Builder(this).setTitle("Pick a color").setView(container).create()
         colorDialog?.show()
     }
 
-    private var colorDialog: AlertDialog? = null
-
     private fun updateColorChip() {
-        val chip = btnPickColor
         val gd = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
             val strokePx = (1 * resources.displayMetrics.density).toInt()
-            setStroke(strokePx, Color.parseColor("#BDBDBD"))
-            val fill = selectedRootColor?.let {
-                try { Color.parseColor(it) } catch (_: Exception) { null }
-            }
+            setStroke(strokePx, "#BDBDBD".toColorInt())
+            val fill = selectedRootColor?.let { try {
+                it.toColorInt() } catch (_: Exception) { null } }
             setColor(fill ?: Color.WHITE)
         }
-        chip.background = gd
+        btnPickColor.background = gd
     }
 
     private fun clearOverridesFor(id: UUID) {
@@ -534,12 +559,22 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         overrideModified.remove(id)
     }
 
-    private fun formatDisplayTime(isoOrOther: String): String {
-        return try {
-            val dt = LocalDateTime.parse(isoOrOther)
-            DateTimeFormatter.ofPattern("MMM d, yyyy  —  h:mma").format(dt)
-        } catch (e: Exception) {
-            isoOrOther
-        }
+    private fun rectIn(container: ViewGroup, v: View): RectF {
+        val locV = IntArray(2)
+        val locC = IntArray(2)
+        v.getLocationOnScreen(locV)
+        container.getLocationOnScreen(locC)
+        val left = (locV[0] - locC[0]).toFloat()
+        val top = (locV[1] - locC[1]).toFloat()
+        val right = left + v.width
+        val bottom = top + v.height
+        return RectF(left, top, right, bottom)
     }
+
+    private fun dp(value: Float): Float = value * resources.displayMetrics.density
+
+    private fun formatDisplayTime(isoOrOther: String): String = try {
+        val dt = LocalDateTime.parse(isoOrOther)
+        DateTimeFormatter.ofPattern("MMM d, yyyy  —  h:mma").format(dt)
+    } catch (_: Exception) { isoOrOther }
 }

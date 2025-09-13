@@ -19,7 +19,7 @@ import com.ericp.e_hub.dto.ToDoDto
 import java.util.UUID
 
 sealed class ToDoRow {
-    data class Header(val title: String, val subtitle: String) : ToDoRow()
+    data class Header(val rootId: UUID, val title: String, val subtitle: String) : ToDoRow()
     data class Task(val dto: ToDoDto, val level: Int, val selected: Boolean) : ToDoRow()
     data object Input : ToDoRow()
     data class Nav(val rootId: UUID, val title: String, val shadeIndex: Int) : ToDoRow()
@@ -34,8 +34,8 @@ class ToDoAdapter(
         fun onAddTask(label: String)
         fun onSwitchRoot(rootId: UUID)
         fun onSelectTask(id: UUID)
-        // New: open details panel on long press
         fun onOpenDetails(id: UUID)
+        fun onSwitchRoot(rootId: UUID, fromView: View?)
     }
 
     private val items = mutableListOf<ToDoRow>()
@@ -45,6 +45,9 @@ class ToDoAdapter(
         items.addAll(newItems)
         notifyDataSetChanged()
     }
+
+    // Expose item for helpers (e.g., swipe-to-delete)
+    fun getItem(position: Int): ToDoRow? = items.getOrNull(position)
 
     override fun getItemViewType(position: Int): Int = when (items[position]) {
         is ToDoRow.Header -> VIEW_HEADER
@@ -175,7 +178,7 @@ class ToDoAdapter(
                 else -> R.color.gray_400
             }
             itemView.setBackgroundResource(shade)
-            itemView.setOnClickListener { listener.onSwitchRoot(row.rootId) }
+            itemView.setOnClickListener { listener.onSwitchRoot(row.rootId, itemView) }
         }
     }
 
