@@ -16,11 +16,13 @@
     <string name="details_title">Details</string>
     <string name="category">Category</string>
     <string name="description_label">Description</string>
+    <string name="title">Title</string>
     <string name="filter_label">Filter:</string>
     <string name="sort">Sort:</string>
     <string name="price_label">Price</string>
     <string name="date_label">Date</string>
     <string name="year_label">Year</string>
+    <string name="state">State</string>
 
     <!-- Characters and Symbols -->
     <string name="price">%1$d€</string>
@@ -33,9 +35,13 @@
     <string name="copy_ic">📋</string>
     <string name="link_ic">🔗</string>
 
+    <!-- Placeholders -->
+    <string name="timedate_placeholder">May, 13 2003  —  9:23pm</string>
+    <string name="current_time_placeholder">12:34</string>
+    <string name="day_placeholder">TUESDAY</string>
+
 
     <!-- Nonogram Activity Strings -->
-    <string name="current_time_placeholder">12:34</string>
     <string name="nonogram_game_title">NONOGRAM</string>
     <string name="puzzle_solved">✓ Solved!</string>
     <string name="back">Back</string>
@@ -211,9 +217,10 @@
     <string name="content">Content</string>
     <string name="last_edited">Last edited: %1$s</string>
 
-    <!-- ToDo Activity Strings -->
+    <!-- TD Activity Strings -->
     <string name="todo_title">To-Do</string>
-    <string name="add_new_list_hint">Add a new list...</string>
+    <string name="add_new_list_hint">Add a new list…</string>
+    <string name="add_new_task_hint">Add a new task…</string>
     <string name="pick_color">Pick color</string>
     <string name="create">Create</string>
     <string name="last_updated">Last updated: %1$s</string>

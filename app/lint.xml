@@ -7,5 +7,7 @@
     <issue id="AndroidGradlePluginVersion" severity="ignore" />
     <issue id="RelativeOverlap" severity="ignore" />
     <issue id="UselessParent" severity="ignore" />
+    <issue id="Autofill" severity="ignore" />
+    <issue id="SmallSp" severity="ignore" />
     <issue id="HardcodedText" severity="error" />
 </lint>

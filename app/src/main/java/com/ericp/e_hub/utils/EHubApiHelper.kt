@@ -8,14 +8,13 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.text.get
 
 /**
  * Class for managing API interactions
  */
 class EHubApiHelper(val context: Context) {
 
-    public val apiManager = ApiManager.getInstance()
+    val apiManager = ApiManager.getInstance()
     private val apiConfig = ApiConfig(context)
 
     /**
@@ -180,14 +179,6 @@ class EHubApiHelper(val context: Context) {
                 }
             }
         }
-    }
-
-
-    /**
-     * Empty the API cache
-     */
-    fun clearApiCache() {
-        apiManager.clearCache(context)
     }
 
     /**

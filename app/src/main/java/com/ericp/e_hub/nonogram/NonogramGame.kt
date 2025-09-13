@@ -116,7 +116,7 @@ data class NonogramGame(
         }
 
         val totalClues = rowClues.sumOf { it.size } + colClues.sumOf { it.size }
-        return totalClues >= 6 && totalClues <= 20
+        return totalClues in 6..20
     }
 
     private fun resetPlayerGrid() {

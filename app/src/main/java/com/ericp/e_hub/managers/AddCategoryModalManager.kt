@@ -1,8 +1,5 @@
 package com.ericp.e_hub.managers
 
-import android.app.Dialog
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -23,19 +20,6 @@ class AddCategoryModalManager(
     private val onCategoryAdded: (ToBuyCategoryDto) -> Unit
 ) {
     private var selectedColor: String = "#2196F3" // Default blue color
-
-    // Predefined colors matching the buttons in the layout
-    private val predefinedColors = listOf(
-        "#2196F3", // Blue (colorButton1)
-        "#4CAF50", // Green (colorButton2)
-        "#FF9800", // Orange (colorButton3)
-        "#9C27B0", // Purple (colorButton4)
-        "#F44336", // Red (colorButton5)
-        "#795548", // Brown (colorButton6)
-        "#607D8B", // Blue Grey (colorButton7)
-        "#E91E63", // Pink (colorButton8)
-        "#00BCD4", // Cyan (colorButton9)
-    )
 
     fun showModal(existingCategory: ToBuyCategoryDto? = null, onUpdate: ((ToBuyCategoryDto) -> Unit)? = null) {
         val dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_add_category, null)

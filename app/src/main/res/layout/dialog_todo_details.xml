@@ -10,7 +10,7 @@
         android:id="@+id/tvDialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Details"
+        android:text="@string/details_title"
         android:textStyle="bold"
         android:textColor="@color/black"
         android:textSize="18sp"/>
@@ -20,10 +20,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Title"
+        android:hint="@string/title"
         android:textColor="@color/gray_700"
         android:textColorHint="@color/gray_400"
         android:background="@android:color/transparent"
+        android:inputType="text"
         android:singleLine="true" />
 
     <EditText
@@ -32,7 +33,7 @@
         android:layout_height="100dp"
         android:layout_marginTop="8dp"
         android:gravity="top|start"
-        android:hint="Description"
+        android:hint="@string/description"
         android:textColor="@color/gray_700"
         android:textColorHint="@color/gray_400"
         android:background="@android:color/transparent"
@@ -43,7 +44,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="State"
+        android:text="@string/state"
         android:textColor="@color/gray_600"
         android:layout_marginTop="12dp"/>
 
@@ -60,7 +61,7 @@
         android:layout_marginTop="12dp"
         android:textColor="@color/gray_500"
         android:textSize="12sp"
-        android:text="Last updated: --"/>
+        android:text="@string/last_updated"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -70,30 +71,30 @@
         android:layout_marginTop="16dp">
 
         <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/cancel"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/gray_300"
+                android:textColor="@color/black"/>
+
+        <Button
             android:id="@+id/btnDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete"
+            android:text="@string/delete"
             android:textAllCaps="false"
             android:backgroundTint="@android:color/holo_red_dark"
             android:textColor="@android:color/white"/>
-
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Cancel"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/gray_300"
-            android:textColor="@color/black"/>
 
         <Button
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Save"
+            android:text="@string/save"
             android:textAllCaps="false"
             android:backgroundTint="@color/black"
             android:textColor="@color/white"/>

@@ -14,6 +14,6 @@
         android:textSize="32sp"
         android:textStyle="bold"
         android:textColor="@color/gray_700"
-        android:text="TUESDAY"/>
+        android:text="@string/day_placeholder"/>
 </FrameLayout>
 
