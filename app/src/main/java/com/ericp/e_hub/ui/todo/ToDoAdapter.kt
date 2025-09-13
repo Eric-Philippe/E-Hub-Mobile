@@ -20,6 +20,7 @@ import com.ericp.e_hub.R
 import com.ericp.e_hub.dto.State
 import com.ericp.e_hub.dto.ToDoDto
 import java.util.UUID
+import androidx.core.graphics.toColorInt
 
 sealed class ToDoRow {
     data class Header(val rootId: UUID, val title: String, val subtitle: String) : ToDoRow()
@@ -119,7 +120,7 @@ class ToDoAdapter(
             try {
                 val tint = if (isDone) {
                     val base = if (d.color.isNullOrBlank()) "#000000" else d.color
-                    ColorStateList.valueOf(Color.parseColor(base))
+                    ColorStateList.valueOf(base.toColorInt())
                 } else {
                     ColorStateList.valueOf(itemView.resources.getColor(R.color.black, null))
                 }
@@ -141,10 +142,10 @@ class ToDoAdapter(
                     cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6f, itemView.resources.displayMetrics)
                     try {
                         val c = if (d.color.isNullOrBlank()) "#FFE0E0E0" else d.color
-                        val parsed = Color.parseColor(c)
+                        val parsed = c.toColorInt()
                         val withAlpha = Color.argb(48, Color.red(parsed), Color.green(parsed), Color.blue(parsed))
                         setColor(withAlpha)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         setColor(Color.argb(32, 0, 0, 0))
                     }
                 }
@@ -157,7 +158,7 @@ class ToDoAdapter(
             val selColor = itemView.resources.getColor(R.color.gray_100, null)
             itemView.setBackgroundColor(if (row.selected) selColor else Color.TRANSPARENT)
 
-            // Cycle states on checkbox click: TODO -> IN_PROGRESS -> DONE -> TODO
+            // Cycle states on checkbox click: TD -> IN_PROGRESS -> DONE -> TD
             cb.setOnClickListener {
                 val next = when (d.state) {
                     State.TODO -> State.IN_PROGRESS

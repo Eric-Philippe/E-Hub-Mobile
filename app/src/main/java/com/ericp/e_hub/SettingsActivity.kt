@@ -239,7 +239,7 @@ class SettingsActivity : Activity() {
                     }
                     is ApiManager.ApiResult.Error -> {
                         apiStatusText.text = "Error: ${result.message}"
-                        Toast.makeText(this@SettingsActivity, "Error de connexion: ${result.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@SettingsActivity, "Connection error: ${result.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {

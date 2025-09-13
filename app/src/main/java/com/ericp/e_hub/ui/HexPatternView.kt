@@ -10,7 +10,7 @@ import android.util.TypedValue
 import android.view.View
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
-import com.ericp.e_hub.R // Ajout de l'import pour R
+import com.ericp.e_hub.R
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin

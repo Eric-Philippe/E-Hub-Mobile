@@ -9,7 +9,6 @@ import com.ericp.e_hub.fragments.tobuy.AddToBuyStepThreeFragment
 import com.ericp.e_hub.models.ToBuyFormData
 import com.ericp.e_hub.utils.EHubApiHelper
 import com.ericp.e_hub.utils.Endpoints
-import java.util.UUID
 
 class AddToBuyModalManager(
     private val activity: FragmentActivity,
@@ -105,13 +104,11 @@ class AddToBuyModalManager(
 
     private fun createToBuyItem() {
         // Trim the bought if not null
-        var boughtString: String? = null;
+        var boughtString: String? = null
         if (currentFormData.bought != null && currentFormData.bought != "null") {
             boughtString =
                 currentFormData.bought?.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
         }
-
-        System.out.println(currentFormData.links)
 
         val toBuyDto = ToBuyDto(
             id = editingItem?.id,
@@ -125,8 +122,6 @@ class AddToBuyModalManager(
             links = currentFormData.links.toList()
         )
 
-        System.out.println(toBuyDto.links)
-
         if (editingItem != null) {
             // Update existing item
             onItemUpdated?.invoke(toBuyDto)
@@ -137,7 +132,7 @@ class AddToBuyModalManager(
             apiHelper.postDataAsync(
                 endpoint = Endpoints.TOBUY,
                 data = toBuyDto,
-                onSuccess = { response ->
+                onSuccess = { _ ->
                     // Handle successful creation
                     onItemCreated(toBuyDto)
                     resetFormData()
