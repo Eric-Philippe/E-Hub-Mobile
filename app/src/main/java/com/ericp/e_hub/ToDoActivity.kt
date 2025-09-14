@@ -26,8 +26,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ericp.e_hub.dto.State
 import com.ericp.e_hub.dto.ToDoDto
 import com.ericp.e_hub.dto.ToDoRequest
-import com.ericp.e_hub.ui.todo.ToDoAdapter
-import com.ericp.e_hub.ui.todo.ToDoRow
+import com.ericp.e_hub.adapters.ToDoAdapter
+import com.ericp.e_hub.adapters.ToDoRow
 import com.ericp.e_hub.utils.api.ToDoApi
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -62,8 +62,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     // Selected color for new root tasks
     private var selectedRootColor: String? = null
 
-    // Collapse seeded once on first successful load
-    private var initializedCollapse: Boolean = false
+    // Track if user intentionally closed the root view
+    private var hasUserClosedRoot: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -164,9 +164,12 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             parentId = null,
             children = emptyList()
         )
-        roots = roots + tempRoot
+        // Insert, then sort by created desc
+        roots = (roots + tempRoot).sortedByDescending { parseAnyDateTime(it.created) ?: LocalDateTime.MIN }
         selectedRootId = tempRoot.id
         selectedParentId = tempRoot.id
+        hasUserClosedRoot = false
+        seedCollapsedForRoot(tempRoot.id)
         render()
         recycler.post { recycler.scrollToPosition(0) }
 
@@ -179,6 +182,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 if (selectedRootId == tempRoot.id) {
                     selectedRootId = roots.firstOrNull()?.id
                     selectedParentId = selectedRootId
+                    selectedRootId?.let { seedCollapsedForRoot(it) }
                 }
                 render()
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -190,21 +194,18 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         api.fetchToDos(
             onSuccess = { list ->
                 roots = list.filter { it.parentId == null }
+                    .sortedByDescending { parseAnyDateTime(it.created) ?: LocalDateTime.MIN }
                 if (roots.isEmpty()) {
                     adapter.submitItems(emptyList())
                     return@fetchToDos
                 }
-                if (selectedRootId == null) selectedRootId = roots.first().id
-                if (selectedParentId == null) selectedParentId = selectedRootId
-
-                // Seed initial collapsed state so subtasks (depth >= 1) are closed under their parent
-                if (!initializedCollapse) {
-                    collapsed.clear()
-                    val selRoot = roots.find { it.id == selectedRootId } ?: roots.first()
-                    collapsed.addAll(collectIdsWithChildren(selRoot.children, startDepth = 0, minDepthToCollapse = 1))
-                    initializedCollapse = true
+                // Only auto-open a root if user hasn't explicitly closed
+                if (selectedRootId == null && !hasUserClosedRoot) {
+                    selectedRootId = roots.first().id
+                    selectedParentId = selectedRootId
+                    selectedRootId?.let { seedCollapsedForRoot(it) }
                 }
-
+                if (selectedRootId != null && selectedParentId == null) selectedParentId = selectedRootId
                 render()
             },
             onError = { msg ->
@@ -220,13 +221,21 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 val prevSel = selectedParentId
                 newTasksByRoot.clear()
                 roots = list.filter { it.parentId == null }
+                    .sortedByDescending { parseAnyDateTime(it.created) ?: LocalDateTime.MIN }
                 if (roots.isEmpty()) {
                     selectedRootId = null
                     selectedParentId = null
                     adapter.submitItems(emptyList())
                     return@fetchToDos
                 }
-                selectedRootId = roots.find { it.id == prevRoot }?.id ?: roots.first().id
+                selectedRootId = when {
+                    prevRoot != null && roots.any { it.id == prevRoot } -> prevRoot
+                    hasUserClosedRoot -> null
+                    else -> roots.first().id
+                }
+                // Seed collapsed when root changed
+                if (selectedRootId != null && selectedRootId != prevRoot) seedCollapsedForRoot(selectedRootId!!)
+
                 selectedParentId = prevSel?.let { sel ->
                     fun existsIn(listIn: List<ToDoDto>): Boolean {
                         listIn.forEach { d ->
@@ -244,7 +253,15 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
     }
 
     private fun render() {
-        val selRootId = selectedRootId ?: return
+        // If no root is selected, show only the nav list of roots
+        val selRootId = selectedRootId
+        if (selRootId == null) {
+            val rows = mutableListOf<ToDoRow>()
+            roots.forEachIndexed { idx, r -> rows += ToDoRow.Nav(r.id, r.label.uppercase(), idx) }
+            adapter.submitItems(rows)
+            return
+        }
+
         val selectedRoot = roots.find { it.id == selRootId } ?: roots.first()
         val otherRoots = roots.filter { it.id != selectedRoot.id }
 
@@ -255,7 +272,7 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val subtitle = formatHeaderTime(latestIso)
         rows += ToDoRow.Header(selectedRoot.id, title, subtitle)
 
-        val children = (selectedRoot.children) + (newTasksByRoot[selectedRoot.id] ?: emptyList())
+        val children = mergeAndSortByCreatedDesc(selectedRoot.children, newTasksByRoot[selectedRoot.id] ?: emptyList())
         rows += flatten(children, 0)
         rows += ToDoRow.Input
         otherRoots.forEachIndexed { idx, r -> rows += ToDoRow.Nav(r.id, r.label.uppercase(), idx) }
@@ -281,12 +298,12 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         list.forEach { d ->
             val withState = applyOverrides(d)
             val isSelected = selectedParentId == d.id
-            val kids = (d.children) + (newTasksByRoot[d.id] ?: emptyList())
-            val hasChildren = kids.isNotEmpty()
+            val kidsUnsorted = mergeAndSortByCreatedDesc(d.children, newTasksByRoot[d.id] ?: emptyList())
+            val hasChildren = kidsUnsorted.isNotEmpty()
             val isCollapsed = collapsed.contains(d.id)
             out += ToDoRow.Task(withState, level, isSelected, hasChildren, isCollapsed)
-            val shouldShowKids = hasChildren && !(level >= 1 && isCollapsed)
-            if (shouldShowKids) out += flatten(kids, level + 1)
+            val shouldShowKids = hasChildren && !isCollapsed
+            if (shouldShowKids) out += flatten(kidsUnsorted, level + 1)
         }
         return out
     }
@@ -367,7 +384,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
             recycler.animate().alpha(0f).setDuration(80).withEndAction {
                 selectedRootId = rootId
                 selectedParentId = rootId
-                collapsed.clear()
+                hasUserClosedRoot = false
+                seedCollapsedForRoot(rootId)
                 render()
                 recycler.alpha = 0f
                 recycler.animate().alpha(1f).setDuration(140).start()
@@ -408,7 +426,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
                 content.removeView(iv)
                 selectedRootId = rootId
                 selectedParentId = rootId
-                collapsed.clear()
+                hasUserClosedRoot = false
+                seedCollapsedForRoot(rootId)
                 render()
                 recycler.alpha = 0.15f
                 recycler.animate().alpha(1f).setDuration(180).start()
@@ -520,6 +539,14 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         render()
     }
 
+    // New: close the currently open root, show only root list
+    override fun onCloseRoot() {
+        selectedRootId = null
+        selectedParentId = null
+        hasUserClosedRoot = true
+        render()
+    }
+
     private var colorDialog: AlertDialog? = null
 
     private fun showColorPicker() {
@@ -595,13 +622,23 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val dt = LocalDateTime.parse(isoOrOther)
         DateTimeFormatter.ofPattern("MMM d, yyyy  —  h:mma").format(dt)
     } catch (_: Exception) { isoOrOther }
+
+    // Seed all nodes with children under a root as collapsed so only first-level is visible
+    private fun seedCollapsedForRoot(rootId: UUID) {
+        collapsed.clear()
+        val root = roots.find { it.id == rootId } ?: return
+        val firstLevel = mergeAndSortByCreatedDesc(root.children, newTasksByRoot[root.id] ?: emptyList())
+        collapsed.addAll(collectIdsWithChildren(firstLevel, startDepth = 0, minDepthToCollapse = 0))
+    }
+
     // Helper: collect IDs of nodes with children, collapsing only from a minimum depth
     private fun collectIdsWithChildren(nodes: List<ToDoDto>, startDepth: Int, minDepthToCollapse: Int): Set<UUID> {
         val out = mutableSetOf<UUID>()
         fun walk(list: List<ToDoDto>, depth: Int) {
             list.forEach { n ->
-                if (n.children.isNotEmpty() && depth >= minDepthToCollapse) out += n.id
-                if (n.children.isNotEmpty()) walk(n.children, depth + 1)
+                val kids = mergeAndSortByCreatedDesc(n.children, newTasksByRoot[n.id] ?: emptyList())
+                if (kids.isNotEmpty() && depth >= minDepthToCollapse) out += n.id
+                if (kids.isNotEmpty()) walk(kids, depth + 1)
             }
         }
         walk(nodes, startDepth)
@@ -662,4 +699,8 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         val dt = parseAnyDateTime(isoOrOther) ?: return isoOrOther
         DateTimeFormatter.ofPattern("MMMM, dd yyyy  —  h:mma").format(dt)
     } catch (_: Exception) { isoOrOther }
+
+    // Merge two lists and sort by created desc
+    private fun mergeAndSortByCreatedDesc(a: List<ToDoDto>, b: List<ToDoDto>): List<ToDoDto> =
+        (a + b).sortedByDescending { parseAnyDateTime(it.created) ?: LocalDateTime.MIN }
 }

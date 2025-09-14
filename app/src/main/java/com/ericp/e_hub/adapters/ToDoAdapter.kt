@@ -1,4 +1,4 @@
-package com.ericp.e_hub.ui.todo
+package com.ericp.e_hub.adapters
 
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -41,6 +41,7 @@ class ToDoAdapter(
         fun onOpenDetails(id: UUID)
         fun onSwitchRoot(rootId: UUID, fromView: View?)
         fun onToggleExpand(id: UUID)
+        fun onCloseRoot()
     }
 
     private val items = mutableListOf<ToDoRow>()
@@ -51,7 +52,6 @@ class ToDoAdapter(
         notifyDataSetChanged()
     }
 
-    // Expose item for helpers (e.g., swipe-to-delete)
     fun getItem(position: Int): ToDoRow? = items.getOrNull(position)
 
     override fun getItemViewType(position: Int): Int = when (items[position]) {
@@ -89,6 +89,8 @@ class ToDoAdapter(
         fun bind(row: ToDoRow.Header) {
             title.text = row.title
             subtitle.text = row.subtitle
+            // Tap header to close current root (show lists view only)
+            itemView.setOnClickListener { listener.onCloseRoot() }
         }
     }
 
@@ -177,8 +179,7 @@ class ToDoAdapter(
                 true
             }
 
-            // Expand/collapse arrow visible only when level >= 2 and has children
-            if (row.level >= 1 && row.hasChildren) {
+            if (row.hasChildren) {
                 expand.visibility = View.VISIBLE
                 expand.rotation = if (row.isCollapsed) -90f else 0f // pointing right when collapsed
                 expand.setOnClickListener { listener.onToggleExpand(d.id) }

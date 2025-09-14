@@ -61,12 +61,12 @@
     <string name="settings_title">Settings</string>
 
     <!-- API Configuration Strings -->
-    <string name="api_configuration">Configuration API</string>
-    <string name="server_url">URL du serveur</string>
+    <string name="api_configuration">API Configuration</string>
+    <string name="server_url">Server URL</string>
     <string name="server_url_hint">https://ehub.homeserver-ericp.fr</string>
     <string name="webdav_endpoint">WebDAV Endpoint</string>
     <string name="webdav_endpoint_hint">/remote.php/webdav/</string>
-    <string name="api_key">Clé API</string>
+    <string name="api_key">API Key</string>
     <string name="api_key_hint">Input your API key</string>
     <string name="secret_key">Encryption Key</string>
     <string name="secret_key_hint">Input your encryption key</string>
@@ -171,10 +171,10 @@
     <string name="bought">Bought</string>
 
     <!-- Cache Management Strings -->
-    <string name="cache_management">Gestion du Cache</string>
-    <string name="cache_description">Effacer le cache peut aider à résoudre les problèmes de données obsolètes</string>
-    <string name="clear_cache">Effacer le Cache</string>
-    <string name="cache_cleared">Cache effacé</string>
+    <string name="cache_management">Cache Management</string>
+    <string name="cache_description">Erase cached data may resolve some issues.</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="cache_cleared">✓ Cache cleared</string>
 
     <!-- Import/Export Strings -->
     <string name="import_export_settings">Import/Export Settings</string>
