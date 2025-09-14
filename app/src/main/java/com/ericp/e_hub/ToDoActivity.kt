@@ -250,7 +250,9 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
 
         val rows = mutableListOf<ToDoRow>()
         val title = selectedRoot.label.uppercase()
-        val subtitle = DateTimeFormatter.ofPattern("MMMM, dd yyyy  —  h:mma").format(LocalDateTime.now())
+        // Compute most recent update across the root and all descendants
+        val latestIso = computeLatestTimestampIso(selectedRoot)
+        val subtitle = formatHeaderTime(latestIso)
         rows += ToDoRow.Header(selectedRoot.id, title, subtitle)
 
         val children = (selectedRoot.children) + (newTasksByRoot[selectedRoot.id] ?: emptyList())
@@ -605,4 +607,59 @@ class ToDoActivity: Activity(), ToDoAdapter.Listener {
         walk(nodes, startDepth)
         return out
     }
+
+    // === New helpers for computing latest timestamp across a root subtree ===
+    private fun parseAnyDateTime(value: String): LocalDateTime? {
+        return try {
+            LocalDateTime.parse(value)
+        } catch (_: Exception) {
+            try {
+                java.time.OffsetDateTime.parse(value).toLocalDateTime()
+            } catch (_: Exception) {
+                try {
+                    java.time.ZonedDateTime.parse(value).toLocalDateTime()
+                } catch (_: Exception) {
+                    null
+                }
+            }
+        }
+    }
+
+    private fun computeLatestTimestampIso(root: ToDoDto): String {
+        val best: LocalDateTime? = null
+        var bestRaw: String? = null
+
+        fun consider(raw: String?) {
+            if (raw == null) return
+            val parsed = parseAnyDateTime(raw)
+            if (best == null) {
+                bestRaw = raw
+                return
+            }
+            if (parsed != null) {
+                if (parsed.isAfter(best)) {
+                    bestRaw = raw
+                }
+            } else  {
+                // Both unparseable, keep any value
+                bestRaw = raw
+            }
+        }
+
+        fun walk(node: ToDoDto) {
+            val d = applyOverrides(node)
+            val candidate = overrideModified[d.id] ?: d.modified ?: d.created
+            consider(candidate)
+            val kids = (d.children) + (newTasksByRoot[d.id] ?: emptyList())
+            kids.forEach { walk(it) }
+        }
+
+        walk(root)
+        return bestRaw ?: root.created
+    }
+
+    private fun formatHeaderTime(isoOrOther: String): String = try {
+        val dt = parseAnyDateTime(isoOrOther) ?: return isoOrOther
+        DateTimeFormatter.ofPattern("MMMM, dd yyyy  —  h:mma").format(dt)
+    } catch (_: Exception) { isoOrOther }
 }
